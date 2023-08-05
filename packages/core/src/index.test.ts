@@ -108,7 +108,6 @@ describe(`${registerDefaultProcedure.name}`, function () {
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
 
     unregister();
-
     expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName)).toBe(false);
   });
@@ -149,7 +148,6 @@ describe(`${registerDefaultProcedure.name}`, function () {
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
 
     unregister();
-
     expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
@@ -163,7 +161,6 @@ describe(`${registerDefaultProcedure.name}`, function () {
     expect(isProcedureRegistered(procedureName, procedure)).toBe(false);
 
     registerProcedure(procedureName, procedure);
-    expect(isDefaultProcedureRegistered(procedureName, defaultProcedure)).toBe(true);
     expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
 
@@ -201,18 +198,13 @@ describe(`${registerProcedure.name}`, function () {
   test('登録と登録解除', function () {
     /** 登録を解除する。 */
     const unregister = registerProcedure(procedureName, procedure);
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
 
     unregister();
-
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName)).toBe(false);
   });
 
   test('既定の手続きに影響しない', function () {
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
-
     /** 登録を解除する。 */
     const unregister1 = registerProcedure(procedureName, procedure);
     expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
@@ -235,23 +227,19 @@ describe(`${registerProcedure.name}`, function () {
   test('上書き', function () {
     /** 登録を解除する。 */
     const unregister1 = registerProcedure(procedureName, procedure1);
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure1)).toBe(true);
     expect(isProcedureRegistered(procedureName, procedure2)).toBe(false);
 
     /** 登録を解除する。 */
     const unregister2 = registerProcedure(procedureName, procedure2);
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure1)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure2)).toBe(true);
 
     unregister1();
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure1)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure2)).toBe(true);
 
     unregister2();
-    expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
     expect(isProcedureRegistered(procedureName)).toBe(false);
   });
 
@@ -260,12 +248,23 @@ describe(`${registerProcedure.name}`, function () {
 
     /** 登録を解除する。 */
     const unregister = registerProcedure(procedureName, procedure);
-    expect(isDefaultProcedureRegistered(procedureName, defaultProcedure)).toBe(true);
     expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(false);
     expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
 
     unregister();
-    expect(isDefaultProcedureRegistered(procedureName, defaultProcedure)).toBe(true);
+    expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(true);
+    expect(isProcedureRegistered(procedureName, procedure)).toBe(false);
+  });
+
+  test('既定の手続きが途中で登録された場合の既定の手続きの復元', function () {
+    /** 登録を解除する。 */
+    const unregister = registerProcedure(procedureName, procedure);
+    expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(false);
+    expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
+
+    registerDefaultProcedure(procedureName, defaultProcedure);
+
+    unregister();
     expect(isProcedureRegistered(procedureName, defaultProcedure)).toBe(true);
     expect(isProcedureRegistered(procedureName, procedure)).toBe(false);
   });
