@@ -347,16 +347,16 @@ export function registerDefaultProcedure<RequestData, ResponseData>(
   name: string,
   procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
 ) {
-  defaultProcedures.set(name, procedure);
-  if (!procedures.has(name)) {
+  if (!procedures.has(name) || procedures.get(name) === defaultProcedures.get(name)) {
     procedures.set(name, procedure);
   }
+  defaultProcedures.set(name, procedure);
   return function () {
-    if (defaultProcedures.get(name) === procedure) {
-      defaultProcedures.delete(name);
-    }
     if (procedures.get(name) === procedure) {
       procedures.delete(name);
+    }
+    if (defaultProcedures.get(name) === procedure) {
+      defaultProcedures.delete(name);
     }
   };
 }
