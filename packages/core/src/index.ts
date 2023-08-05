@@ -11,14 +11,12 @@ export const CEPC_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
 export const CEPC_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
 /** CEPCエラーコード: 未初期化 */
 export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
-/** CEPC識別子プロパティ名 */
-export const CEPC_IDENTIFIER_PROPERTY_NAME = 'CEPC_IDENTIFIER';
 /** CEPC識別子 */
 const CEPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
 /** CEPCペイロード文字列接頭辞 */
-const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
+export const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
 /** CEPCプロトコル */
-const CEPC_PROTOCOL = 'cepc';
+export const CEPC_PROTOCOL = 'cepc';
 
 /** コールバック */
 const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): void }]>();
