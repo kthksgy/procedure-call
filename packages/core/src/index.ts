@@ -29,17 +29,11 @@
  * ```
  */
 
-import type { Platform } from 'react-native';
-
 /** LRPC(`lrpc`)の表示可能なモジュール名 */
 export const NAME = 'LRPC';
 /** LRPC(`lrpc`)のパッケージバージョン */
 export const VERSION = '0.0.9'; // 変更した場合はファイル先頭のバージョンの記述も変更する。
 
-console.debug(`[${NAME}] バージョン: \`${VERSION}\``);
-
-/** LRPC WebView Host 呼び出し関数名 */
-export const LRPC_CALL_WVH_FUNCTION_NAME = 'lrpcWvhCallFunction';
 /** LRPCエラーコード: 内部エラー */
 export const LRPC_ERROR_CODE_INTERNAL = 'LRPC_INTERNAL';
 /** LRPCエラーコード: タイムアウト */
@@ -52,8 +46,6 @@ export const LRPC_ERROR_CODE_UNINITIALIZED = 'LRPC_UNINITIALIZED';
 export const LRPC_IDENTIFIER_PROPERTY_NAME = 'LRPC_IDENTIFIER';
 /** LRPC識別子 */
 const LRPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
-/** LRPCソケット関数名 */
-export const LRPC_WVG_SOCKET_FUNCTION_NAME = 'lrpcWvgSocketFunction';
 /** LRPCプロトコル */
 const LRPC_PROTOCOL = 'lrpc';
 
@@ -62,7 +54,7 @@ const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): voi
 /** 既定の手続き */
 const defaultProcedures = new Map<string, LrpcProcedure>();
 /** カウンター */
-let n = 0;
+const n = 0;
 /** 手続き */
 const procedures = new Map<string, LrpcProcedure>();
 
@@ -273,144 +265,6 @@ export async function callProcedure<RequestData, ResponseData>(
 }
 
 /**
- * WindowClientの手続きを呼び出す。
- * @param windowClient WindowClient
- * @param name 名前
- * @param requestData リクエストデータ
- * @param options オプション
- * @returns レスポンスデータ
- */
-export async function callWcProcedure<RequestData, ResponseData>(
-  windowClient: { postMessage: { (message: string): void } } | null | undefined,
-  name: string,
-  requestData: RequestData,
-  options?: LrpcProcedureCallOptions,
-): Promise<Jsonized<Awaited<ResponseData>, object>> {
-  if (windowClient && typeof windowClient.postMessage === 'function') {
-    /** 送信関数 */
-    const post = function (message: string) {
-      windowClient.postMessage(message);
-    };
-    return callProcedure(`WVH:${LRPC_IDENTIFIER}:${n++}`, post, name, requestData, options);
-  } else {
-    console.error(
-      `[${NAME}] Service Worker Hostが初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
-    );
-    throw new LrpcError(LRPC_ERROR_CODE_UNINITIALIZED);
-  }
-}
-
-/**
- * WebView Guestの手続きを呼び出す。
- * @param webView WebView
- * @param name 名前
- * @param requestData リクエストデータ
- * @param options オプション
- * @returns レスポンスデータ
- */
-export async function callWvgProcedure<RequestData, ResponseData>(
-  webView: { injectJavaScript: { (script: string): void } } | null | undefined,
-  name: string,
-  requestData: RequestData,
-  options?: LrpcProcedureCallOptions,
-): Promise<Jsonized<Awaited<ResponseData>, object>> {
-  if (webView && typeof webView.injectJavaScript === 'function') {
-    /** 送信関数 */
-    const post = function (message: string) {
-      webView.injectJavaScript(
-        `window[${generateTemplateLiteralString(
-          LRPC_WVG_SOCKET_FUNCTION_NAME,
-        )}](${generateTemplateLiteralString(message)});true;`,
-      );
-    };
-    return callProcedure(`WVH:${LRPC_IDENTIFIER}:${n++}`, post, name, requestData, options);
-  } else {
-    console.error(
-      `[${NAME}] WebViewが初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
-    );
-    throw new LrpcError(LRPC_ERROR_CODE_UNINITIALIZED);
-  }
-}
-
-/**
- * WebView Hostの手続きを呼び出す。
- * @param webView WebView
- * @param name 手続きの名前
- * @param requestData リクエストデータ
- * @param options オプション
- * @returns レスポンスデータ
- */
-export async function callWvhProcedure<RequestData, ResponseData>(
-  name: string,
-  requestData: RequestData,
-  options?: LrpcProcedureCallOptions,
-): Promise<Jsonized<Awaited<ResponseData>, object>> {
-  if (
-    typeof window === 'object' &&
-    window !== null &&
-    typeof window.ReactNativeWebView === 'object' &&
-    window.ReactNativeWebView !== null &&
-    typeof window.ReactNativeWebView.postMessage === 'function'
-  ) {
-    /** 送信関数 */
-    const post = window.ReactNativeWebView.postMessage.bind(window.ReactNativeWebView);
-    return callProcedure(
-      `WVG:${window[LRPC_IDENTIFIER_PROPERTY_NAME]}:${n++}`,
-      post,
-      name,
-      requestData,
-      options,
-    );
-  } else {
-    console.error(
-      `[${NAME}] \`window.ReactNativeWebView.postMessage()\`が初期化されていないため、` +
-        `手続き\`${name}\`のリクエストを送信できません。`,
-    );
-    throw new LrpcError(LRPC_ERROR_CODE_UNINITIALIZED);
-  }
-}
-if (typeof window === 'object' && window !== null) {
-  // `window`に公開する。
-  window[LRPC_CALL_WVH_FUNCTION_NAME] = callWvhProcedure;
-}
-
-/**
- * @returns `bypassConsole`を導入するスクリプト
- */
-export function generateBypassConsoleInstaller() {
-  return `console = {...console, ...Object.fromEntries(['debug', 'error', 'info', 'log', 'warn'].map(function (level) {
-    return [level, function (...parameters) {
-        window[${generateTemplateLiteralString(LRPC_CALL_WVH_FUNCTION_NAME)}]('bypassConsole', {
-          content: parameters.map(function (parameter) {
-            return String((parameter !== null && typeof parameter === 'object') ? JSON.stringify(parameter) : parameter);
-          }).join(' '),
-          level,
-        });
-    }];
-  })
-)};`;
-}
-
-/**
- * @param identifier 識別子
- * @returns LRPC識別子を設定するスクリプト
- */
-export function generateLrpcIdentifierSetter(identifier: string) {
-  return `window[${generateTemplateLiteralString(
-    LRPC_IDENTIFIER_PROPERTY_NAME,
-  )}] = ${generateTemplateLiteralString(identifier)};`;
-}
-
-/**
- * @returns `window.ReactNativePlatform`を設定するスクリプト
- */
-export function generateReactNativePlatformSetter(platform: Platform) {
-  return `window.ReactNativePlatform = JSON.parse(${generateTemplateLiteralString(
-    JSON.stringify(platform),
-  )});`;
-}
-
-/**
  * テンプレートリテラル文字列を生成する。
  * @param s 文字列
  * @returns テンプレートリテラル文字列
@@ -419,53 +273,6 @@ export function generateReactNativePlatformSetter(platform: Platform) {
  */
 export function generateTemplateLiteralString(s: string) {
   return `\`${s.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
-}
-
-/**
- * WebView Hostソケット関数を生成する。
- * @param getWebView WebViewを取得する。
- * @returns ソケット関数
- */
-export function generateWvhSocketFunction(getWebView: {
-  (): { injectJavaScript: { (script: string): void } } | null | undefined;
-}) {
-  /**
-   * ソケット関数
-   * @param event イベント
-   */
-  return function (event: { nativeEvent: { data: string } }) {
-    /** ペイロード文字列 */
-    const payloadString = event.nativeEvent.data;
-
-    /** 送信関数 */
-    const post = function (message: string, payload: LrpcPacket<'req'>) {
-      /** WebView */
-      const webView = getWebView();
-      if (webView) {
-        webView.injectJavaScript(
-          `window[${generateTemplateLiteralString(
-            LRPC_WVG_SOCKET_FUNCTION_NAME,
-          )}](${generateTemplateLiteralString(message)});true;`,
-        );
-      } else {
-        console.error(
-          `[${NAME}] WebViewが初期化されていないため、手続き\`${payload.name}\`の結果を送信できません。`,
-        );
-      }
-    };
-
-    socketFunction(payloadString, post);
-  };
-}
-
-/** `window.ReactNativePlatform`を取得する。 */
-export function getPlatform() {
-  return typeof window === 'object' && window !== null ? window.ReactNativePlatform : undefined;
-}
-
-/** `window.ReactNativeWebView`を取得する。 */
-export function getWebView() {
-  return typeof window === 'object' && window !== null ? window.ReactNativeWebView : undefined;
 }
 
 /**
@@ -480,10 +287,7 @@ export function getWebView() {
  *
  * @version 0
  */
-export function isProcedureRegistered<RequestData, ResponseData>(
-  name?: string,
-  procedure?: LrpcProcedure<RequestData, ResponseData>,
-) {
+export function isProcedureRegistered(name?: string, procedure?: any) {
   if (name !== undefined) {
     if (procedure !== undefined) {
       return procedures.get(name) === procedure;
@@ -499,35 +303,7 @@ export function isProcedureRegistered<RequestData, ResponseData>(
 
 /** LRPCを初期化する。 */
 export function initialize() {
-  // `bypassConsole`を登録する。
-  registerProcedure<
-    {
-      content: string;
-      level: 'debug' | 'error' | 'info' | 'log' | 'warn';
-    },
-    void
-  >('bypassConsole', async function (requestData) {
-    console[requestData.level]('<WebView>', requestData.content);
-  });
-
   console.debug(`[${NAME}] 初期化しました。`);
-}
-
-/** WebViewである場合、`true`を返す。 */
-export function isWebView() {
-  return Boolean(
-    typeof window === 'object' && window !== null && window.ReactNativeWebView !== undefined,
-  );
-}
-
-/** AndroidのWebViewである場合、`true`を返す。 */
-export function isWebViewAndroid() {
-  return isWebView() && window.ReactNativePlatform?.OS === 'android';
-}
-
-/** iOSのWebViewである場合、`true`を返す。 */
-export function isWebViewIos() {
-  return isWebView() && window.ReactNativePlatform?.OS === 'ios';
 }
 
 /**
@@ -692,93 +468,5 @@ export function socketFunction(
     }
   } else {
     console.error(`[${NAME}] ペイロード\`${payloadString}\`が無効な形式です。`);
-  }
-}
-
-/**
- * Window Clientのソケット関数を開始する。
- * @returns 停止する。
- */
-export function startWcSocketFunction() {
-  if (
-    typeof navigator === 'object' &&
-    navigator !== null &&
-    typeof navigator.serviceWorker === 'object' &&
-    navigator.serviceWorker !== null
-  ) {
-    /** リスナー */
-    const listener = function (event: MessageEvent<string>) {
-      if (typeof event.data === 'string' && event.data.length > 0) {
-        /** 送信関数 */
-        const post = function (message: string, payload: LrpcPacket<'req'>) {
-          /** ソース */
-          if (event.source !== null) {
-            event.source.postMessage(message);
-          } else {
-            console.error(
-              `[${NAME}] \`event.source\`が\`null\`であるため、手続き\`${payload.name}\`のレスポンスを送信できません。`,
-            );
-          }
-        };
-
-        socketFunction(event.data, post);
-      }
-    };
-    navigator.serviceWorker.addEventListener('message', listener);
-    return function () {
-      navigator.serviceWorker.removeEventListener('message', listener);
-    };
-  } else {
-    console.error(
-      `[${NAME}] Service Workerに対応していないため、Window Clientのソケット関数を開始できません。`,
-    );
-    return function () {};
-  }
-}
-
-/**
- * WebView Guestソケット関数
- * @param payloadString ペイロード文字列
- */
-export function wvgSocketFunction(payloadString: string) {
-  /** 送信関数 */
-  const post = function (message: string, payload: LrpcPacket<'req'>) {
-    if (
-      typeof window === 'object' &&
-      window !== null &&
-      typeof window.ReactNativeWebView === 'object' &&
-      window.ReactNativeWebView !== null &&
-      typeof window.ReactNativeWebView.postMessage === 'function'
-    ) {
-      window.ReactNativeWebView.postMessage(message);
-    } else {
-      console.error(
-        `[${NAME}] \`window.ReactNativeWebView.postMessage()\`が初期化されていないため、` +
-          `手続き\`${payload.name}\`のレスポンスを送信できません。`,
-      );
-    }
-  };
-
-  socketFunction(payloadString, post);
-}
-if (typeof window === 'object' && window !== null) {
-  // `window`に公開する。
-  window[LRPC_WVG_SOCKET_FUNCTION_NAME] = wvgSocketFunction;
-}
-
-declare global {
-  interface Window {
-    ReactNativePlatform?: Jsonized<Platform, undefined>;
-
-    ReactNativeWebView?: {
-      postMessage: { (message: string): void };
-    };
-
-    /** LRPC呼び出し関数 */
-    [LRPC_CALL_WVH_FUNCTION_NAME]: typeof callWvhProcedure;
-    /** LRPC識別子 */
-    [LRPC_IDENTIFIER_PROPERTY_NAME]?: string;
-    /** LRPCソケット関数 */
-    [LRPC_WVG_SOCKET_FUNCTION_NAME]: typeof wvgSocketFunction;
   }
 }
