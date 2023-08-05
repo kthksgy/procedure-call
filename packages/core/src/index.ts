@@ -386,6 +386,16 @@ export function registerProcedure<RequestData, ResponseData>(
 }
 
 /**
+ * リセットする。
+ */
+export function reset() {
+  callbacks.clear();
+  defaultProcedures.clear();
+  n = 0;
+  procedures.clear();
+}
+
+/**
  * ソケット関数
  * @param payloadString ペイロード文字列
  * @param post 送信関数
@@ -510,12 +520,12 @@ if (import.meta.vitest) {
       [1, '1'],
       [61, 'z'],
       [62, '10'],
-    ])('"%d" => "%s"', function (n, s) {
+    ])(`${generateDuosexagesimalString.name}(%d) => "%s"`, function (n, s) {
       expect(generateDuosexagesimalString(n)).toBe(s);
     });
   });
 
-  test(`${generateRandomString.name}`, function () {
+  test(`${generateRandomString.name}: 0文字から64文字までの生成`, function () {
     expect(generateRandomString(0)).toBe('');
     expect(generateRandomString(-1)).toBe('');
     for (let length = 1; length <= 64; length++) {
@@ -531,8 +541,38 @@ if (import.meta.vitest) {
     expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
   });
 
+  test(`${callProcedure.name}: \`n\`の増加`, function () {
+    reset();
+
+    expect(n).toBe(0);
+
+    callProcedure(function () {}, 'procedure1', undefined);
+
+    expect(n).toBe(1);
+  });
+
   test(`${parsePayloadString.name}`, function () {
     // TODO: テストを書く。
     expect(1).toBe(1);
+  });
+
+  test(`${reset.name}`, function () {
+    reset();
+
+    callProcedure(function () {}, 'procedure1', undefined);
+    registerDefaultProcedure('procedure2', async function () {});
+    registerProcedure('procedure3', async function () {});
+
+    expect(callbacks.size).not.toBe(0);
+    expect(n).not.toBe(0);
+    expect(defaultProcedures.size).not.toBe(0);
+    expect(procedures.size).not.toBe(0);
+
+    reset();
+
+    expect(callbacks.size).toBe(0);
+    expect(n).toBe(0);
+    expect(defaultProcedures.size).toBe(0);
+    expect(procedures.size).toBe(0);
   });
 }
