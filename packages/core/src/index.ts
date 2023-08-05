@@ -54,7 +54,7 @@ const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): voi
 /** 既定の手続き */
 const defaultProcedures = new Map<string, LrpcProcedure>();
 /** カウンター */
-const n = 0;
+let n = 0;
 /** 手続き */
 const procedures = new Map<string, LrpcProcedure>();
 
@@ -225,7 +225,6 @@ type NeverOmitted<Type> = Type extends object
 
 /**
  * 手続きを呼び出す。
- * @param key キー
  * @param post 送信関数
  * @param name 名前
  * @param requestData リクエストデータ
@@ -233,13 +232,14 @@ type NeverOmitted<Type> = Type extends object
  * @returns レスポンスデータ
  */
 export async function callProcedure<RequestData, ResponseData>(
-  key: string,
   post: { (message: string): void },
   name: string,
   requestData: RequestData,
   options?: LrpcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   return new Promise(function (resolve, reject) {
+    /** キー */
+    const key = `${NAME}:${LRPC_IDENTIFIER}:${n++}`;
     callbacks.set(key, [resolve, reject]);
     /** リクエスト */
     const request: LrpcRawPacket<'req'> = {
