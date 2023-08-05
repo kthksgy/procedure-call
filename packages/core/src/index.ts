@@ -211,6 +211,7 @@ export async function callProcedure<RequestData, ResponseData>(
     const key = CEPC_IDENTIFIER + ':' + String(n++);
 
     callbacks.set(key, [resolve, reject]);
+
     /** リクエスト */
     const request: CepcRawPacket<'req'> = {
       data: requestData,
@@ -340,6 +341,11 @@ export function socketFunction(
   payloadString: string,
   post: { (message: string, payload: CepcPacket<'req'>): void },
 ) {
+  if (!payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
+    console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が${NAME}の物ではありません。`);
+    return;
+  }
+
   /** ペイロード */
   const payload: CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> =
     JSON.parse(payloadString);
@@ -440,6 +446,6 @@ export function socketFunction(
       }
     }
   } else {
-    console.error(`[${NAME}] ペイロード\`${payloadString}\`が無効な形式です。`);
+    console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
   }
 }
