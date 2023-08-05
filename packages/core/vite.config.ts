@@ -10,6 +10,7 @@ export default defineConfig(function () {
         fileName: 'index',
         name: 'index',
       },
+      outDir: 'lib',
     },
     define: {
       /** バージョン(`package.json` `version`) */
