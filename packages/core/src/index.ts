@@ -174,7 +174,7 @@ type CepcRawPacket<
   /** バージョン */
   v: Version;
 } & (Type extends 'err'
-  ? { code?: string; data?: Data; message?: string }
+  ? { code: string; data?: Data; message?: string }
   : Type extends 'req'
   ? { data: Data }
   : Type extends 'res'
@@ -409,6 +409,7 @@ export function socketFunction(
               } else {
                 console.error(error);
                 return {
+                  code: CEPC_ERROR_CODE_INTERNAL,
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,
@@ -420,21 +421,22 @@ export function socketFunction(
               }
             })
             .then(function (response) {
-              post(JSON.stringify(response), payload);
+              post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
             });
         } else {
           console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
           post(
-            JSON.stringify({
-              code: CEPC_ERROR_CODE_UNDEFINED,
-              index: payload.index + 1,
-              key: payload.key,
-              name: payload.name,
-              p: CEPC_PROTOCOL,
-              timestamp: Date.now(),
-              t: 'err',
-              v: 0,
-            } satisfies CepcPacket<'err'>),
+            CEPC_PAYLOAD_STRING_PREFIX +
+              JSON.stringify({
+                code: CEPC_ERROR_CODE_UNDEFINED,
+                index: payload.index + 1,
+                key: payload.key,
+                name: payload.name,
+                p: CEPC_PROTOCOL,
+                timestamp: Date.now(),
+                t: 'err',
+                v: 0,
+              } satisfies CepcPacket<'err'>),
             payload,
           );
         }
