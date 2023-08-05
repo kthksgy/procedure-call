@@ -275,9 +275,25 @@ export function isProcedureRegistered(name?: string, procedure?: any) {
   }
 }
 
-/** CEPCを初期化する。 */
-export function initialize() {
-  console.debug(`[${NAME}] 初期化しました。`);
+/**
+ * ペイロード文字列を解析する。
+ * @param payloadString ペイロード文字列
+ * @returns ペイロード
+ */
+export function parsePayloadString(
+  payloadString: string,
+): CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> | undefined {
+  if (payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
+    try {
+      /** ペイロード */
+      const payload = JSON.parse(payloadString.slice(CEPC_PAYLOAD_STRING_PREFIX.length));
+      return payload;
+    } catch {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
 }
 
 /**
@@ -337,15 +353,14 @@ export function socketFunction(
   payloadString: string,
   post: { (message: string, payload: CepcPacket<'req'>): void },
 ) {
-  if (!payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
-    console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が${NAME}の物ではありません。`);
-    return;
-  }
-
   /** ペイロード */
-  const payload: CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> =
-    JSON.parse(payloadString);
-  if (payload && payload.p === CEPC_PROTOCOL && payload.v === 0) {
+  const payload = parsePayloadString(payloadString);
+  if (
+    typeof payload === 'object' &&
+    payload !== null &&
+    payload.p === CEPC_PROTOCOL &&
+    payload.v === 0
+  ) {
     switch (payload.t) {
       case 'req': {
         /** 手続き */
