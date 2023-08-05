@@ -247,6 +247,32 @@ export function generateTemplateLiteralString(s: string) {
 }
 
 /**
+ * 既定の手続きが登録されている場合、`true`を返す。
+ * @param name 名前
+ * @param procedure 手続き
+ * @returns 真偽値
+ *
+ * - 名前のみ指定した場合、その名前で手続きが登録されている場合に`true`を返す。
+ * - 手続きのみ指定した場合、その手続きが何れかの名前で登録されている場合に`true`を返す。
+ * - 名前と手続きを指定した場合、その名前でその手続きが登録されている場合に`true`を返す。
+ *
+ * @version 0
+ */
+export function isDefaultProcedureRegistered(name?: string, procedure?: any) {
+  if (name !== undefined) {
+    if (procedure !== undefined) {
+      return defaultProcedures.get(name) === procedure;
+    } else {
+      return defaultProcedures.has(name);
+    }
+  } else if (procedure !== undefined) {
+    return Array.from(defaultProcedures.values()).includes(procedure);
+  } else {
+    return false;
+  }
+}
+
+/**
  * 手続きが登録されている場合、`true`を返す。
  * @param name 名前
  * @param procedure 手続き
@@ -258,10 +284,7 @@ export function generateTemplateLiteralString(s: string) {
  *
  * @version 0
  */
-export function isProcedureRegistered<RequestData, ResponseData>(
-  name?: string,
-  procedure?: CepcProcedure<RequestData, ResponseData>,
-) {
+export function isProcedureRegistered(name?: string, procedure?: any) {
   if (name !== undefined) {
     if (procedure !== undefined) {
       return procedures.get(name) === procedure;
