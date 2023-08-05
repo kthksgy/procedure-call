@@ -29,7 +29,6 @@ const procedures = new Map<string, CepcProcedure>();
 
 /**
  * JSON化された
- * @version 1.1.0
  */
 type Jsonized<Type, Parent extends object | Array<any> | undefined> = Type extends
   | symbol
@@ -72,7 +71,6 @@ export interface CepcContext<Data = unknown> {
 
 /**
  * CEPCエラー
- * @version 2
  */
 export class CepcError<Data = unknown> extends Error {
   /**
@@ -107,7 +105,6 @@ export class CepcError<Data = unknown> extends Error {
 
 /**
  * CEPCエラーオプション
- * @version 0
  */
 export interface CepcErrorOptions<Data = unknown> extends ErrorOptions {
   /** データ */
@@ -116,7 +113,6 @@ export interface CepcErrorOptions<Data = unknown> extends ErrorOptions {
 
 /**
  * CEPCパケット
- * @version 4
  */
 type CepcPacket<
   Type extends 'err' | 'req' | 'res',
@@ -126,7 +122,6 @@ type CepcPacket<
 
 /**
  * CEPC手続き
- * @version 1
  */
 type CepcProcedure<RequestData = any, ResponseData = any> = {
   /**
@@ -140,7 +135,6 @@ type CepcProcedure<RequestData = any, ResponseData = any> = {
 
 /**
  * CEPC手続き呼び出しオプション
- * @version 0
  */
 export type CepcProcedureCallOptions = {
   /** タイムアウト時間[ミリ秒] */
@@ -149,7 +143,6 @@ export type CepcProcedureCallOptions = {
 
 /**
  * CEPCローパケット
- * @version 0
  */
 type CepcRawPacket<
   Type extends 'err' | 'req' | 'res',
@@ -186,7 +179,6 @@ type CepcVersionUnion = 0;
 
 /**
  * バリューが`never`のキーが省略された
- * @version 1.0.0
  */
 type NeverOmitted<Type> = Type extends object
   ? { [Key in keyof Type as Type[Key] extends never ? never : Key]: Type[Key] }
@@ -236,17 +228,6 @@ export async function callProcedure<RequestData, ResponseData>(
 }
 
 /**
- * テンプレートリテラル文字列を生成する。
- * @param s 文字列
- * @returns テンプレートリテラル文字列
- *
- * @version 0
- */
-export function generateTemplateLiteralString(s: string) {
-  return `\`${s.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
-}
-
-/**
  * 既定の手続きが登録されている場合、`true`を返す。
  * @param name 名前
  * @param procedure 手続き
@@ -255,8 +236,6 @@ export function generateTemplateLiteralString(s: string) {
  * - 名前のみ指定した場合、その名前で手続きが登録されている場合に`true`を返す。
  * - 手続きのみ指定した場合、その手続きが何れかの名前で登録されている場合に`true`を返す。
  * - 名前と手続きを指定した場合、その名前でその手続きが登録されている場合に`true`を返す。
- *
- * @version 0
  */
 export function isDefaultProcedureRegistered(name?: string, procedure?: any) {
   if (name !== undefined) {
@@ -281,8 +260,6 @@ export function isDefaultProcedureRegistered(name?: string, procedure?: any) {
  * - 名前のみ指定した場合、その名前で手続きが登録されている場合に`true`を返す。
  * - 手続きのみ指定した場合、その手続きが何れかの名前で登録されている場合に`true`を返す。
  * - 名前と手続きを指定した場合、その名前でその手続きが登録されている場合に`true`を返す。
- *
- * @version 0
  */
 export function isProcedureRegistered(name?: string, procedure?: any) {
   if (name !== undefined) {
@@ -307,9 +284,7 @@ export function initialize() {
  * 既定の手続きを登録する。
  * @param name 名前
  * @param procedure 手続き
- * @returns 手続きを登録解除する。
- *
- * @version 0
+ * @returns 既定の手続きを登録解除する。
  */
 export function registerDefaultProcedure<RequestData, ResponseData>(
   name: string,
@@ -334,8 +309,6 @@ export function registerDefaultProcedure<RequestData, ResponseData>(
  * @param name 名前
  * @param procedure 手続き
  * @returns 手続きを登録解除する。
- *
- * @version 0
  */
 export function registerProcedure<RequestData, ResponseData>(
   name: string,
