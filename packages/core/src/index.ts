@@ -1,7 +1,39 @@
+import { describe, expect, test } from 'vitest';
+
 /** 名前 */
 export const NAME = 'CEPC';
 /** バージョン */
 export const VERSION = __version;
+
+/** 文字 */
+const CHARACTERS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+/**
+ * 62進数文字列を生成する。
+ * @param x 10進数
+ * @returns 62進数文字列
+ */
+function generateDuosexagesimalString(x: number) {
+  /** 文字 */
+  const characters = [];
+  for (; x > 0; x = Math.floor(x / CHARACTERS.length)) {
+    characters.unshift(CHARACTERS.at(x % CHARACTERS.length));
+  }
+  return characters.length > 0 ? characters.join('') : '0';
+}
+
+/**
+ * 乱文字列
+ * @param length 文字数
+ * @returns 乱文字列
+ */
+function generateRandomString(length: number) {
+  return Array.from({ length: Math.max(length, 0) })
+    .map(function () {
+      return CHARACTERS[Math.floor(CHARACTERS.length * Math.random())];
+    })
+    .join('');
+}
 
 /** CEPCエラーコード: 内部エラー */
 export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
@@ -12,7 +44,7 @@ export const CEPC_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
 /** CEPCエラーコード: 未初期化 */
 export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
 /** CEPC識別子 */
-const CEPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
+const CEPC_IDENTIFIER = generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
 /** CEPCペイロード文字列接頭辞 */
 export const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
 /** CEPCプロトコル */
@@ -280,14 +312,23 @@ export function isProcedureRegistered(name?: string, procedure?: any) {
  * @param payloadString ペイロード文字列
  * @returns ペイロード
  */
-export function parsePayloadString(
+function parsePayloadString(
   payloadString: string,
 ): CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> | undefined {
   if (payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
     try {
       /** ペイロード */
       const payload = JSON.parse(payloadString.slice(CEPC_PAYLOAD_STRING_PREFIX.length));
-      return payload;
+      if (
+        typeof payload === 'object' &&
+        payload !== null &&
+        payload.p === CEPC_PROTOCOL &&
+        payload.v === 0
+      ) {
+        return payload;
+      } else {
+        return undefined;
+      }
     } catch {
       return undefined;
     }
@@ -355,12 +396,7 @@ export function socketFunction(
 ) {
   /** ペイロード */
   const payload = parsePayloadString(payloadString);
-  if (
-    typeof payload === 'object' &&
-    payload !== null &&
-    payload.p === CEPC_PROTOCOL &&
-    payload.v === 0
-  ) {
+  if (payload !== undefined) {
     switch (payload.t) {
       case 'req': {
         /** 手続き */
@@ -461,4 +497,42 @@ export function socketFunction(
   } else {
     console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
   }
+}
+
+if (import.meta.vitest) {
+  test('数字／英大文字／英小文字の文字数', function () {
+    expect(CHARACTERS.length).toBe(10 + 26 * 2);
+  });
+
+  describe(`${generateDuosexagesimalString.name}`, function () {
+    test.each([
+      [0, '0'],
+      [1, '1'],
+      [61, 'z'],
+      [62, '10'],
+    ])('"%d" => "%s"', function (n, s) {
+      expect(generateDuosexagesimalString(n)).toBe(s);
+    });
+  });
+
+  test(`${generateRandomString.name}`, function () {
+    expect(generateRandomString(0)).toBe('');
+    expect(generateRandomString(-1)).toBe('');
+    for (let length = 1; length <= 64; length++) {
+      /** 正規表現 */
+      const regularExpression = new RegExp(`^[0-9A-Za-z]{${length}}$`);
+      for (let i = 0; i < 128; i++) {
+        expect(generateRandomString(length)).toMatch(regularExpression);
+      }
+    }
+  });
+
+  test(`識別子"${CEPC_IDENTIFIER}"の形式`, function () {
+    expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
+  });
+
+  test(`${parsePayloadString.name}`, function () {
+    // TODO: テストを書く。
+    expect(1).toBe(1);
+  });
 }

@@ -12,9 +12,16 @@ export default defineConfig(function () {
       },
       outDir: 'lib',
     },
+
     define: {
       /** バージョン(`package.json` `version`) */
-      __version: JSON.stringify(process.env.npm_package_version),
+      __version: `'${process.env.npm_package_version}'`,
+      // `if(import.meta.vitest) { ... }`を削除する。
+      'import.meta.vitest': 'undefined',
+    },
+
+    test: {
+      includeSource: ['src/**/*.{js,ts}'],
     },
   };
 });
