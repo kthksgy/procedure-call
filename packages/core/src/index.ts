@@ -94,12 +94,10 @@ type Jsonized<Type, Parent extends object | Array<any> | undefined> = Type exten
 /**
  * CEPCコンテキスト
  */
-export interface CepcContext<Data = unknown> {
+export type CepcContext<Data = unknown, Context extends object = object> = {
   /** ペイロード */
   payload: CepcPacket<'req', CepcVersionUnion, Data>;
-  /** WebView */
-  webView?: unknown;
-}
+} & Context;
 
 /**
  * CEPCエラー
@@ -155,14 +153,14 @@ type CepcPacket<
 /**
  * CEPC手続き
  */
-type CepcProcedure<RequestData = any, ResponseData = any> = {
+type CepcProcedure<RequestData = any, ResponseData = any, Context extends object = object> = {
   /**
    * @param requestData リクエストデータ
    * @param context コンテキスト
    * @returns レスポンスデータ
    * @throws {CepcError} エラー
    */
-  (requestData: RequestData, context: CepcContext<RequestData>): Promise<ResponseData>;
+  (requestData: RequestData, context: CepcContext<RequestData, Context>): Promise<ResponseData>;
 };
 
 /**
