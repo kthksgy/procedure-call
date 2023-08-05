@@ -225,7 +225,7 @@ type NeverOmitted<Type> = Type extends object
 export async function call<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
-  post: { (message: string): void },
+  post: { (payloadString: string): void },
   options?: CepcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   return new Promise(function (resolve, reject) {
@@ -430,7 +430,7 @@ export function reset() {
  */
 export function handle(
   payloadString: string,
-  post: { (message: string, payload: CepcPacket<'req'>): void },
+  post: { (payloadString: string, payload: CepcPacket<'req'>): void },
   assist?: { (payloadString: string): void },
 ) {
   /** ペイロード */
