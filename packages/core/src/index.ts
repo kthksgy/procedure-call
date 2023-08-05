@@ -20,6 +20,8 @@ export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
 export const CEPC_IDENTIFIER_PROPERTY_NAME = 'CEPC_IDENTIFIER';
 /** CEPC識別子 */
 const CEPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
+/** CEPCペイロード文字列接頭辞 */
+const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
 /** CEPCプロトコル */
 const CEPC_PROTOCOL = 'cepc';
 
@@ -70,7 +72,11 @@ type Jsonized<Type, Parent extends object | Array<any> | undefined> = Type exten
  */
 export interface CepcContext<Data = unknown> {
   /** ペイロード */
-  payload: CepcPacket<'req', CepcVersionUnion, Data>;
+  payload: CepcPacket<
+    'req',
+    CepcVersionUnion,
+    Jsonized<Data extends void | undefined ? void : Data extends [infer T] ? T : Data, object>
+  >;
   /** WebView */
   webView?: unknown;
 }
@@ -133,24 +139,45 @@ type CepcPacket<
  * CEPC手続き
  * @version 1
  */
-type CepcProcedure<RequestData = any, ResponseData = any> = {
+type CepcProcedure<
+  Procedure extends { (...parameters: Array<any>): any } = { (...parameters: Array<any>): any },
+> = {
   /**
    * @param requestData リクエストデータ
    * @param context コンテキスト
    * @returns レスポンスデータ
    * @throws {CepcError} エラー
    */
-  (requestData: RequestData, context: CepcContext<RequestData>): Promise<ResponseData>;
+  (
+    ...parameters: [
+      ...parameters: Parameters<Procedure>,
+      context?: CepcContext<Parameters<Procedure>>,
+    ]
+  ): Promise<ReturnType<Procedure>>;
 };
 
 /**
  * CEPC手続き呼び出しオプション
  * @version 0
  */
-export type CepcProcedureCallOptions = {
+export class CepcProcedureCallOptions {
   /** タイムアウト時間[ミリ秒] */
   timeout?: number;
-};
+
+  private constructor(options?: { timeout?: CepcProcedureCallOptions['timeout'] }) {
+    if (options) {
+      if (options.timeout) {
+        this.timeout = options.timeout;
+      }
+    }
+  }
+
+  static create(options?: {
+    timeout?: CepcProcedureCallOptions['timeout'];
+  }): CepcProcedureCallOptions {
+    return new CepcProcedureCallOptions(options);
+  }
+}
 
 /**
  * CEPCローパケット
@@ -181,7 +208,7 @@ type CepcRawPacket<
 } & (Type extends 'err'
   ? { code?: string; data?: Data; message?: string }
   : Type extends 'req'
-  ? { data: Data }
+  ? { data: Data extends void | undefined ? void : Data extends [infer T] ? T : Data }
   : Type extends 'res'
   ? { data: Data }
   : unknown);
@@ -205,19 +232,30 @@ type NeverOmitted<Type> = Type extends object
  * @param options オプション
  * @returns レスポンスデータ
  */
-export async function callProcedure<RequestData, ResponseData>(
+export async function callProcedure<Procedure extends { (...parameters: Array<any>): any }>(
   post: { (message: string): void },
   name: string,
-  requestData: RequestData,
-  options?: CepcProcedureCallOptions,
-): Promise<Jsonized<Awaited<ResponseData>, object>> {
+  ...parameters: [...parameters: Parameters<Procedure>, options?: CepcProcedureCallOptions]
+): Promise<Jsonized<Awaited<ReturnType<Procedure>>, object>> {
   return new Promise(function (resolve, reject) {
+    /** データ */
+    let data = [];
+    /** オプション */
+    let options: CepcProcedureCallOptions | undefined = parameters.at(-1);
+
+    if (options instanceof CepcProcedureCallOptions) {
+      data = parameters.slice(0, -1);
+    } else {
+      data = parameters;
+      options = undefined;
+    }
+
     /** キー */
     const key = `${NAME}:${CEPC_IDENTIFIER}:${n++}`;
     callbacks.set(key, [resolve, reject]);
     /** リクエスト */
     const request: CepcRawPacket<'req'> = {
-      data: requestData,
+      data,
       index: 0,
       key,
       name,
@@ -227,7 +265,7 @@ export async function callProcedure<RequestData, ResponseData>(
       v: 0,
     };
 
-    post(JSON.stringify(request));
+    post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request));
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
       setTimeout(function () {
@@ -288,9 +326,11 @@ export function initialize() {
  *
  * @version 0
  */
-export function registerDefaultProcedure<RequestData, ResponseData>(
+export function registerDefaultProcedure<Procedure extends { (...parameters: Array<any>): any }>(
   name: string,
-  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: CepcProcedure<{
+    (...parameters: Jsonized<Parameters<Procedure>, object>): Awaited<ReturnType<Procedure>>;
+  }>,
 ) {
   defaultProcedures.set(name, procedure);
   if (!procedures.has(name)) {
@@ -314,9 +354,11 @@ export function registerDefaultProcedure<RequestData, ResponseData>(
  *
  * @version 0
  */
-export function registerProcedure<RequestData, ResponseData>(
+export function registerProcedure<Procedure extends { (...parameters: Array<any>): any }>(
   name: string,
-  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: CepcProcedure<{
+    (...parameters: Jsonized<Parameters<Procedure>, object>): Awaited<ReturnType<Procedure>>;
+  }>,
 ) {
   procedures.set(name, procedure);
   return function () {
