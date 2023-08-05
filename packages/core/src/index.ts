@@ -258,6 +258,35 @@ export async function call<RequestData, ResponseData>(
 }
 
 /**
+ * 対象の手続きを呼び出す。
+ * @param target 対象
+ * @param name 名前
+ * @param requestData リクエストデータ
+ * @param options オプション
+ * @returns レスポンスデータ
+ */
+export async function callProcedure<RequestData, ResponseData>(
+  target: { postMessage: { (message: string): void } } | null | undefined,
+  name: string,
+  requestData: RequestData,
+  options?: CepcProcedureCallOptions,
+): Promise<Jsonized<Awaited<ResponseData>, object>> {
+  if (
+    typeof target === 'object' &&
+    target !== null &&
+    'postMessage' in target &&
+    typeof target.postMessage === 'function'
+  ) {
+    return call(name, requestData, target.postMessage.bind(target), options);
+  } else {
+    console.error(
+      `[${NAME}] \`target.postMessage\`が初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
+    );
+    throw new CepcError(CEPC_ERROR_CODE_UNINITIALIZED);
+  }
+}
+
+/**
  * 既定の手続きが登録されている場合、`true`を返す。
  * @param name 名前
  * @param procedure 手続き
