@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   CEPC_ERROR_CODE_INTERNAL,
@@ -80,4 +80,34 @@ test('補助関数', function () {
   );
 
   expect(promise).resolves.toBe(true);
+});
+
+test('コールバックが存在しない場合のレスポンス受信', function () {
+  /** `console.error` */
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+
+  handle(
+    'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
+    function () {},
+  );
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    '[CEPC] リクエスト`NAME:KEY`のコールバックが存在しないため、レスポンスを受信できません。',
+  );
+
+  consoleErrorSpy.mockRestore();
+});
+
+test('コールバックが存在しない場合のエラー受信', function () {
+  /** `console.error` */
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+
+  handle(
+    'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
+    function () {},
+  );
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    '[CEPC] リクエスト`NAME:KEY`のコールバックが存在しないため、エラーを受信できません。',
+  );
+
+  consoleErrorSpy.mockRestore();
 });
