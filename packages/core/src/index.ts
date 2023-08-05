@@ -1,62 +1,36 @@
 /**
- * @file LRPC - Local Remote Procedure Call
- * @module lrpc
- * @version 0.0.9
- *
- * @example WebViewに導入する
- *
- * - `window`のプロパティとして`LRPC_IDENTIFIER_PROPERTY_NAME`に指定されたキーに識別子を設定する。
- *   - `generateLrpcIdentifierSetter()`を使用してスクリプト文字列を生成できる。
- * - `onMessage`に`generateSocketFunction`で生成したソケット関数を設定する。
- *   - `useMemo()`を使用してメモ化する事を推奨する。
- *
- * ```
- * const webViewReference = useRef<WebView>(null);
- *
- * const socketFunction = useMemo(function () {
- *   return generateSocketFunction(function () {
- *     return webViewReference.current;
- *   });
- * }, []);
- *
- * return (
- *   <WebView
- *     injectedJavaScript={`window[${generateTemplateLiteralString(LRPC_IDENTIFIER_PROPERTY_NAME)}]='GUEST1';true;`}
- *     onMessage={socketFunction}
- *     ref={webViewReference}
- *   />
- * );
- * ```
+ * @file CEPC - Contextual External Procedure Call
+ * @module cepc
  */
 
-/** LRPC(`lrpc`)の表示可能なモジュール名 */
-export const NAME = 'LRPC';
-/** LRPC(`lrpc`)のパッケージバージョン */
-export const VERSION = '0.0.9'; // 変更した場合はファイル先頭のバージョンの記述も変更する。
+/** 名前 */
+export const NAME = 'CEPC';
+/** バージョン */
+export const VERSION = __version;
 
-/** LRPCエラーコード: 内部エラー */
-export const LRPC_ERROR_CODE_INTERNAL = 'LRPC_INTERNAL';
-/** LRPCエラーコード: タイムアウト */
-export const LRPC_ERROR_CODE_TIMEOUT = 'LRPC_TIMEOUT';
-/** LRPCエラーコード: 未定義 */
-export const LRPC_ERROR_CODE_UNDEFINED = 'LRPC_UNDEFINED';
-/** LRPCエラーコード: 未初期化 */
-export const LRPC_ERROR_CODE_UNINITIALIZED = 'LRPC_UNINITIALIZED';
-/** LRPC識別子プロパティ名 */
-export const LRPC_IDENTIFIER_PROPERTY_NAME = 'LRPC_IDENTIFIER';
-/** LRPC識別子 */
-const LRPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
-/** LRPCプロトコル */
-const LRPC_PROTOCOL = 'lrpc';
+/** CEPCエラーコード: 内部エラー */
+export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
+/** CEPCエラーコード: タイムアウト */
+export const CEPC_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
+/** CEPCエラーコード: 未定義 */
+export const CEPC_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
+/** CEPCエラーコード: 未初期化 */
+export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
+/** CEPC識別子プロパティ名 */
+export const CEPC_IDENTIFIER_PROPERTY_NAME = 'CEPC_IDENTIFIER';
+/** CEPC識別子 */
+const CEPC_IDENTIFIER = `${Date.now()}:${Math.random()}`;
+/** CEPCプロトコル */
+const CEPC_PROTOCOL = 'cepc';
 
 /** コールバック */
 const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): void }]>();
 /** 既定の手続き */
-const defaultProcedures = new Map<string, LrpcProcedure>();
+const defaultProcedures = new Map<string, CepcProcedure>();
 /** カウンター */
 let n = 0;
 /** 手続き */
-const procedures = new Map<string, LrpcProcedure>();
+const procedures = new Map<string, CepcProcedure>();
 
 /**
  * JSON化された
@@ -92,20 +66,20 @@ type Jsonized<Type, Parent extends object | Array<any> | undefined> = Type exten
   : Type;
 
 /**
- * LRPCコンテキスト
+ * CEPCコンテキスト
  */
-export interface LrpcContext<Data = unknown> {
+export interface CepcContext<Data = unknown> {
   /** ペイロード */
-  payload: LrpcPacket<'req', LrpcVersionUnion, Data>;
+  payload: CepcPacket<'req', CepcVersionUnion, Data>;
   /** WebView */
   webView?: unknown;
 }
 
 /**
- * LRPCエラー
+ * CEPCエラー
  * @version 2
  */
-export class LrpcError<Data = unknown> extends Error {
+export class CepcError<Data = unknown> extends Error {
   /**
    * コード
    * @default ''
@@ -121,11 +95,11 @@ export class LrpcError<Data = unknown> extends Error {
    */
   timestamp: number;
 
-  constructor(code?: string, message?: string, options?: LrpcErrorOptions<Data>) {
+  constructor(code?: string, message?: string, options?: CepcErrorOptions<Data>) {
     super(message, options && options.cause ? { cause: options.cause } : undefined);
 
     this.code = code ?? '';
-    this.name = LrpcError.name + '[' + this.code + ']';
+    this.name = CepcError.name + '[' + this.code + ']';
     this.timestamp = Date.now();
 
     if (options) {
@@ -137,54 +111,54 @@ export class LrpcError<Data = unknown> extends Error {
 }
 
 /**
- * LRPCエラーオプション
+ * CEPCエラーオプション
  * @version 0
  */
-export interface LrpcErrorOptions<Data = unknown> extends ErrorOptions {
+export interface CepcErrorOptions<Data = unknown> extends ErrorOptions {
   /** データ */
   data?: Data;
 }
 
 /**
- * LRPCパケット
+ * CEPCパケット
  * @version 4
  */
-type LrpcPacket<
+type CepcPacket<
   Type extends 'err' | 'req' | 'res',
-  Version extends LrpcVersionUnion = 0,
+  Version extends CepcVersionUnion = 0,
   Data = unknown,
-> = LrpcRawPacket<Type, Version, Jsonized<Data, object>>;
+> = CepcRawPacket<Type, Version, Jsonized<Data, object>>;
 
 /**
- * LRPC手続き
+ * CEPC手続き
  * @version 1
  */
-type LrpcProcedure<RequestData = any, ResponseData = any> = {
+type CepcProcedure<RequestData = any, ResponseData = any> = {
   /**
    * @param requestData リクエストデータ
    * @param context コンテキスト
    * @returns レスポンスデータ
-   * @throws {LrpcError} エラー
+   * @throws {CepcError} エラー
    */
-  (requestData: RequestData, context: LrpcContext<RequestData>): Promise<ResponseData>;
+  (requestData: RequestData, context: CepcContext<RequestData>): Promise<ResponseData>;
 };
 
 /**
- * LRPC手続き呼び出しオプション
+ * CEPC手続き呼び出しオプション
  * @version 0
  */
-export type LrpcProcedureCallOptions = {
+export type CepcProcedureCallOptions = {
   /** タイムアウト時間[ミリ秒] */
   timeout?: number;
 };
 
 /**
- * LRPCローパケット
+ * CEPCローパケット
  * @version 0
  */
-type LrpcRawPacket<
+type CepcRawPacket<
   Type extends 'err' | 'req' | 'res',
-  Version extends LrpcVersionUnion = 0,
+  Version extends CepcVersionUnion = 0,
   Data = unknown,
 > = {
   /**
@@ -197,7 +171,7 @@ type LrpcRawPacket<
   /** 手続きの名前 */
   name: string;
   /** プロトコル */
-  p: typeof LRPC_PROTOCOL;
+  p: typeof CEPC_PROTOCOL;
   /** タイムスタンプ(UNIX時間)[ミリ秒] */
   timestamp: number;
   /** タイプ */
@@ -212,8 +186,8 @@ type LrpcRawPacket<
   ? { data: Data }
   : unknown);
 
-/** LRPCバージョンユニオン */
-type LrpcVersionUnion = 0;
+/** CEPCバージョンユニオン */
+type CepcVersionUnion = 0;
 
 /**
  * バリューが`never`のキーが省略された
@@ -235,19 +209,19 @@ export async function callProcedure<RequestData, ResponseData>(
   post: { (message: string): void },
   name: string,
   requestData: RequestData,
-  options?: LrpcProcedureCallOptions,
+  options?: CepcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   return new Promise(function (resolve, reject) {
     /** キー */
-    const key = `${NAME}:${LRPC_IDENTIFIER}:${n++}`;
+    const key = `${NAME}:${CEPC_IDENTIFIER}:${n++}`;
     callbacks.set(key, [resolve, reject]);
     /** リクエスト */
-    const request: LrpcRawPacket<'req'> = {
+    const request: CepcRawPacket<'req'> = {
       data: requestData,
       index: 0,
       key,
       name,
-      p: LRPC_PROTOCOL,
+      p: CEPC_PROTOCOL,
       timestamp: Date.now(),
       t: 'req',
       v: 0,
@@ -257,7 +231,7 @@ export async function callProcedure<RequestData, ResponseData>(
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
       setTimeout(function () {
-        reject(new LrpcError(LRPC_ERROR_CODE_TIMEOUT));
+        reject(new CepcError(CEPC_ERROR_CODE_TIMEOUT));
         callbacks.delete(key);
       }, options.timeout);
     }
@@ -301,7 +275,7 @@ export function isProcedureRegistered(name?: string, procedure?: any) {
   }
 }
 
-/** LRPCを初期化する。 */
+/** CEPCを初期化する。 */
 export function initialize() {
   console.debug(`[${NAME}] 初期化しました。`);
 }
@@ -316,7 +290,7 @@ export function initialize() {
  */
 export function registerDefaultProcedure<RequestData, ResponseData>(
   name: string,
-  procedure: LrpcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
 ) {
   defaultProcedures.set(name, procedure);
   if (!procedures.has(name)) {
@@ -342,7 +316,7 @@ export function registerDefaultProcedure<RequestData, ResponseData>(
  */
 export function registerProcedure<RequestData, ResponseData>(
   name: string,
-  procedure: LrpcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
 ) {
   procedures.set(name, procedure);
   return function () {
@@ -365,41 +339,41 @@ export function registerProcedure<RequestData, ResponseData>(
  */
 export function socketFunction(
   payloadString: string,
-  post: { (message: string, payload: LrpcPacket<'req'>): void },
+  post: { (message: string, payload: CepcPacket<'req'>): void },
 ) {
   /** ペイロード */
-  const payload: LrpcPacket<'err'> | LrpcPacket<'req'> | LrpcPacket<'res'> =
+  const payload: CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> =
     JSON.parse(payloadString);
-  if (payload && payload.p === LRPC_PROTOCOL && payload.v === 0) {
+  if (payload && payload.p === CEPC_PROTOCOL && payload.v === 0) {
     switch (payload.t) {
       case 'req': {
         /** 手続き */
         const procedure = procedures.get(payload.name);
         if (procedure) {
           procedure(payload.data, { payload })
-            .then(function (responseData): LrpcPacket<'res'> {
+            .then(function (responseData): CepcPacket<'res'> {
               return {
                 data: responseData,
                 index: payload.index + 1,
                 key: payload.key,
                 name: payload.name,
-                p: LRPC_PROTOCOL,
+                p: CEPC_PROTOCOL,
                 timestamp: Date.now(),
                 t: 'res',
                 v: 0,
               };
             })
-            .catch(function (error): LrpcPacket<'err'> {
-              if (error instanceof LrpcError) {
+            .catch(function (error): CepcPacket<'err'> {
+              if (error instanceof CepcError) {
                 console.debug(error);
                 return {
-                  code: error.code || LRPC_ERROR_CODE_INTERNAL,
+                  code: error.code || CEPC_ERROR_CODE_INTERNAL,
                   ...(error.data !== undefined && { data: error.data }),
                   index: payload.index + 1,
                   key: payload.key,
                   ...(error.message && { message: error.message }),
                   name: payload.name,
-                  p: LRPC_PROTOCOL,
+                  p: CEPC_PROTOCOL,
                   timestamp: error.timestamp,
                   t: 'err',
                   v: 0,
@@ -410,7 +384,7 @@ export function socketFunction(
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,
-                  p: LRPC_PROTOCOL,
+                  p: CEPC_PROTOCOL,
                   timestamp: Date.now(),
                   t: 'err',
                   v: 0,
@@ -424,15 +398,15 @@ export function socketFunction(
           console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
           post(
             JSON.stringify({
-              code: LRPC_ERROR_CODE_UNDEFINED,
+              code: CEPC_ERROR_CODE_UNDEFINED,
               index: payload.index + 1,
               key: payload.key,
               name: payload.name,
-              p: LRPC_PROTOCOL,
+              p: CEPC_PROTOCOL,
               timestamp: Date.now(),
               t: 'err',
               v: 0,
-            } satisfies LrpcPacket<'err'>),
+            } satisfies CepcPacket<'err'>),
             payload,
           );
         }
@@ -456,7 +430,7 @@ export function socketFunction(
         /** コールバック */
         const callback = callbacks.get(payload.key);
         if (callback) {
-          callback[1](new LrpcError(payload.code, payload.message, { data: payload.data }));
+          callback[1](new CepcError(payload.code, payload.message, { data: payload.data }));
           callbacks.delete(payload.key);
         } else {
           console.error(
