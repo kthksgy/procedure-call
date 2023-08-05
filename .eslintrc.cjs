@@ -1,12 +1,12 @@
 /**
  * @file ESLintの設定ファイル
- * @version 1.2.2
+ * @version 1.3.0
  *
  * @tutorial VSCodeで使用している場合、変更を行った後は必ず再起動する。
  */
 
 /*
-# パッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
+# 必須のパッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
 $ npm i -D \
   '@typescript-eslint/eslint-plugin@~6.2.1' \
   '@typescript-eslint/parser@~6.2.1' \
@@ -14,9 +14,13 @@ $ npm i -D \
   'eslint@~8.46.0' \
   'eslint-config-prettier@~8.10.0' \
   'eslint-import-resolver-typescript@~3.5.5' \
-  'eslint-plugin-import@~2.26.0' \
-  'eslint-plugin-react@~7.33.1' \
-  'eslint-plugin-react-hooks@~4.6.0'
+  'eslint-plugin-import@~2.26.0'
+
+# Reactを使用する場合はインストールする。
+$ npm i -D 'eslint-plugin-react@~7.33.1' 'eslint-plugin-react-hooks@~4.6.0'
+
+# Storybookを使用する場合はインストールする。
+$ npm i -D 'eslint-plugin-storybook@~0.6.13'
 */
 
 const fs = require('fs');
@@ -59,29 +63,21 @@ module.exports = {
     'prettier',
   ],
   overrides: [
-    /** Storybook */
     ...(estlintPluginStorybook
       ? [
           {
             files: ['**/*.stories.{js?(x),ts?(x)}'],
-            extends: [
-              'plugin:storybook/recommended',
-              // Prettierと競合するルールを無効化する。
-              'prettier',
-            ],
+            extends: ['plugin:storybook/recommended', 'prettier'],
           },
         ]
       : []),
 
-    /** TypeScript */
     {
       extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:import/typescript',
-        'plugin:react/recommended',
-        'plugin:react/jsx-runtime',
-        'plugin:react-hooks/recommended',
-        // Prettierと競合するルールを無効化する。
+        ...(eslintPluginReact ? ['plugin:react/recommended', 'plugin:react/jsx-runtime'] : []),
+        ...(eslintPluginReactHooks ? ['plugin:react-hooks/recommended'] : []),
         'prettier',
       ],
       files: ['**/*.ts?(x)'],
@@ -362,32 +358,28 @@ module.exports = {
     // `eslint-plugin-react`のルール
     // https://github.com/jsx-eslint/eslint-plugin-react#list-of-supported-rules
     // ---------------------------------------------------------------------------------------------
-
-    /** 他のコンポーネントの`propTypes`プロパティを参照しない。 */
-    'react/forbid-foreign-prop-types': ['warn', { allowInPropTypes: true }],
-    /** `boolean`型の属性をJSXで指定する場合、`={true}`を省略する。 */
-    'react/jsx-boolean-value': 'warn',
-    /** コンポーネント名は`PascalCase`で命名する。 */
-    'react/jsx-pascal-case': [
-      'warn',
-      {
-        allowAllCaps: true,
-      },
-    ],
-    /** コンポーネントプロパティの順番を規定する。 */
-    'react/jsx-sort-props': 'warn',
-    /** コンポーネントの`style`プロパティをオブジェクトで指定する。 */
-    'react/style-prop-object': reactNative ? 'off' : 'warn',
+    ...(eslintPluginReact && {
+      /** 他のコンポーネントの`propTypes`プロパティを参照しない。 */
+      'react/forbid-foreign-prop-types': ['warn', { allowInPropTypes: true }],
+      /** `boolean`型の属性をJSXで指定する場合、`={true}`を省略する。 */
+      'react/jsx-boolean-value': 'warn',
+      /** コンポーネント名は`PascalCase`で命名する。 */
+      'react/jsx-pascal-case': [
+        'warn',
+        {
+          allowAllCaps: true,
+        },
+      ],
+      /** コンポーネントプロパティの順番を規定する。 */
+      'react/jsx-sort-props': 'warn',
+      /** コンポーネントの`style`プロパティをオブジェクトで指定する。 */
+      'react/style-prop-object': reactNative ? 'off' : 'warn',
+    }),
   },
   settings: {
     'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
     'import/ignore': [...(reactNative ? ['react-native'] : [])],
-    'import/resolver': {
-      node: true,
-      typescript: true,
-    },
-    react: {
-      version: 'detect',
-    },
+    'import/resolver': { node: true, typescript: true },
+    ...(eslintPluginReact && { react: { version: 'detect' } }),
   },
 };
