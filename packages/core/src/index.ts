@@ -97,7 +97,7 @@ type Jsonized<Type, Parent extends object | Array<any> | undefined> = Type exten
 export type CepcContext<Data = unknown, Context extends object = object> = {
   /** ペイロード */
   payload: CepcPacket<'req', CepcVersionUnion, Data>;
-} & Context;
+} & Partial<Context>;
 
 /**
  * CEPCエラー
@@ -397,10 +397,12 @@ export function reset() {
  * ソケット関数
  * @param payloadString ペイロード文字列
  * @param post 送信関数
+ * @param assist 補助関数
  */
 export function socketFunction(
   payloadString: string,
   post: { (message: string, payload: CepcPacket<'req'>): void },
+  assist?: { (payloadString: string): void },
 ) {
   /** ペイロード */
   const payload = parsePayloadString(payloadString);
@@ -503,7 +505,11 @@ export function socketFunction(
       }
     }
   } else {
-    console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
+    if (assist) {
+      assist(payloadString);
+    } else {
+      console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
+    }
   }
 }
 
