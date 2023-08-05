@@ -503,7 +503,6 @@ export function handle(
             payload,
           );
         }
-
         break;
       }
       case 'res': {
