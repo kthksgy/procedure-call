@@ -216,16 +216,16 @@ type NeverOmitted<Type> = Type extends object
 
 /**
  * 手続きを呼び出す。
- * @param post 送信関数
  * @param name 名前
  * @param requestData リクエストデータ
+ * @param post 送信関数
  * @param options オプション
  * @returns レスポンスデータ
  */
-export async function callProcedure<RequestData, ResponseData>(
-  post: { (message: string): void },
+export async function call<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
+  post: { (message: string): void },
   options?: CepcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   return new Promise(function (resolve, reject) {
@@ -394,12 +394,12 @@ export function reset() {
 }
 
 /**
- * ソケット関数
+ * ペイロード文字列を処理する。
  * @param payloadString ペイロード文字列
  * @param post 送信関数
  * @param assist 補助関数
  */
-export function socketFunction(
+export function handle(
   payloadString: string,
   post: { (message: string, payload: CepcPacket<'req'>): void },
   assist?: { (payloadString: string): void },
@@ -545,12 +545,12 @@ if (import.meta.vitest) {
     expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
   });
 
-  test(`${callProcedure.name}: \`n\`の増加`, function () {
+  test(`${call.name}: \`n\`の増加`, function () {
     reset();
 
     expect(n).toBe(0);
 
-    callProcedure(function () {}, 'procedure1', undefined);
+    call('procedure1', undefined, function () {});
 
     expect(n).toBe(1);
   });
@@ -563,7 +563,7 @@ if (import.meta.vitest) {
   test(`${reset.name}`, function () {
     reset();
 
-    callProcedure(function () {}, 'procedure1', undefined);
+    call('procedure1', undefined, function () {});
     registerDefaultProcedure('procedure2', async function () {});
     registerProcedure('procedure3', async function () {});
 
