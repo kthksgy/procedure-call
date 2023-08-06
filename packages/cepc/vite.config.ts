@@ -11,6 +11,7 @@ export default defineConfig(function () {
         name: 'cepc',
       },
       outDir: 'lib',
+      sourcemap: true,
     },
 
     define: {
