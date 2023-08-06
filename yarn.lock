@@ -1013,13 +1013,21 @@ __metadata:
     vite: ^4.4.8
     vitest: ^0.34.1
   peerDependencies:
-    cepc: ^0.0.0
+    cepc: ^0.0.1
   languageName: unknown
   linkType: soft
 
 "cepc-service-worker@workspace:packages/cepc-service-worker":
   version: 0.0.0-use.local
   resolution: "cepc-service-worker@workspace:packages/cepc-service-worker"
+  dependencies:
+    "@types/node": ~18
+    "@vitest/coverage-v8": ^0.34.1
+    typescript: ^5.1.6
+    vite: ^4.4.8
+    vitest: ^0.34.1
+  peerDependencies:
+    cepc: ^0.0.1
   languageName: unknown
   linkType: soft
 
