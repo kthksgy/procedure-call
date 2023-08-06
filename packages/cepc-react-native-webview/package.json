@@ -1,11 +1,54 @@
 {
-  "name": "cepc-react-native-webview",
-  "version": "0.0.0",
-  "description": "Procedure Call - React Native WebView",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": {
+    "name": "kthksgy",
+    "url": "https://github.com/kthksgy"
   },
-  "author": "",
-  "license": "ISC"
+  "license": "MIT",
+  "description": "CEPC React Native WebView",
+  "devDependencies": {
+    "@types/node": "~18",
+    "@vitest/coverage-v8": "^0.34.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8",
+    "vitest": "^0.34.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.umd.js",
+      "types": "./lib/types/index.d.ts"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "call",
+    "cepc",
+    "communication",
+    "interface",
+    "local",
+    "lpc",
+    "procedure",
+    "remote",
+    "rpc"
+  ],
+  "main": "./lib/index.umd.cjs",
+  "module": "./lib/index.mjs",
+  "name": "cepc-react-native-webview",
+  "peerDependencies": {
+    "cepc": "^0.0.0"
+  },
+  "repository": {
+    "directory": "packages/cepc-react-native-webview",
+    "type": "git",
+    "url": "https://github.com/kthksgy/cepc.git"
+  },
+  "scripts": {
+    "build": "vite build && tsc --project tsconfig.build.json",
+    "clean": "rm -rf coverage && rm -rf lib",
+    "coverage": "vitest run --coverage",
+    "test": "vitest"
+  },
+  "version": "0.0.0"
 }
