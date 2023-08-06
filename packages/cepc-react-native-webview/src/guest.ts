@@ -1,6 +1,6 @@
 import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, call, handle } from 'cepc';
 
-import { CEPC_KEY_CALL_HOST, CEPC_KEY_HANDLE_GUEST } from './common';
+import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_HANDLE_WEB_VIEW_GUEST } from './common';
 
 import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
 
@@ -11,7 +11,7 @@ import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
  * @param options オプション
  * @returns レスポンスデータ
  */
-export async function callHost<RequestData, ResponseData>(
+export async function callWebViewHost<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
   options?: CepcProcedureCallOptions,
@@ -36,7 +36,7 @@ export async function callHost<RequestData, ResponseData>(
 }
 
 /** WebView Guestである場合、`true`を返す。 */
-export function isWebView() {
+export function isWebViewGuest() {
   return typeof window === 'object' && window !== null && Boolean(window.ReactNativeWebView);
 }
 
@@ -44,7 +44,7 @@ export function isWebView() {
  * WebView Guestの処理関数
  * @param payloadString ペイロード文字列
  */
-export async function handleGuest(payloadString: string) {
+export async function handleWebViewGuest(payloadString: string) {
   /** 送信関数 */
   const post = function (message: string, payload: CepcPacket<'req'>) {
     if (
@@ -66,21 +66,21 @@ export async function handleGuest(payloadString: string) {
   await handle(payloadString, post);
 }
 
-export function startGuestHandler() {
+export function startWebViewGuestHandler() {
   if (typeof window === 'object' && window !== null) {
     // `window`に公開する。
-    window[CEPC_KEY_CALL_HOST] = callHost;
-    window[CEPC_KEY_HANDLE_GUEST] = handleGuest;
+    window[CEPC_KEY_CALL_WEB_VIEW_HOST] = callWebViewHost;
+    window[CEPC_KEY_HANDLE_WEB_VIEW_GUEST] = handleWebViewGuest;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
-  return stopGuestHandler;
+  return stopWebViewGuestHandler;
 }
 
-export function stopGuestHandler() {
+export function stopWebViewGuestHandler() {
   if (typeof window === 'object' && window !== null) {
-    window[CEPC_KEY_CALL_HOST] = undefined;
-    window[CEPC_KEY_HANDLE_GUEST] = undefined;
+    window[CEPC_KEY_CALL_WEB_VIEW_HOST] = undefined;
+    window[CEPC_KEY_HANDLE_WEB_VIEW_GUEST] = undefined;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
@@ -91,10 +91,10 @@ declare global {
     ReactNativeWebView?: {
       postMessage: { (message: string): void };
     };
-    [CEPC_KEY_CALL_HOST]?: {
+    [CEPC_KEY_CALL_WEB_VIEW_HOST]?: {
       (name: string, requestData: unknown, options?: CepcProcedureCallOptions): Promise<unknown>;
     };
-    [CEPC_KEY_HANDLE_GUEST]?: { (payloadString: string): void };
+    [CEPC_KEY_HANDLE_WEB_VIEW_GUEST]?: { (payloadString: string): void };
   }
 
   let window: Window;

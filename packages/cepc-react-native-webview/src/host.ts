@@ -9,7 +9,7 @@ import {
   registerDefaultProcedure,
 } from 'cepc';
 
-import { CEPC_KEY_CALL_HOST, CEPC_KEY_HANDLE_GUEST } from './common';
+import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_HANDLE_WEB_VIEW_GUEST } from './common';
 
 import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
 
@@ -21,7 +21,7 @@ import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
  * @param options オプション
  * @returns レスポンスデータ
  */
-export async function callGuest<RequestData, ResponseData>(
+export async function callWebViewGuest<RequestData, ResponseData>(
   webView: { injectJavaScript: { (script: string): void } } | null | undefined,
   name: string,
   requestData: RequestData,
@@ -36,7 +36,7 @@ export async function callGuest<RequestData, ResponseData>(
     const post = function (message: string) {
       webView.injectJavaScript(
         `window[${generateTemplateLiteralString(
-          CEPC_KEY_HANDLE_GUEST,
+          CEPC_KEY_HANDLE_WEB_VIEW_GUEST,
         )}](${generateTemplateLiteralString(message)});true;`,
       );
     };
@@ -65,7 +65,7 @@ export function generateBypassConsoleInstaller() {
 
   return `console = {...console, ...Object.fromEntries(['debug', 'error', 'info', 'log', 'warn'].map(function (level) {
     return [level, function (...parameters) {
-        window[${generateTemplateLiteralString(CEPC_KEY_CALL_HOST)}]('bypassConsole', {
+        window[${generateTemplateLiteralString(CEPC_KEY_CALL_WEB_VIEW_HOST)}]('bypassConsole', {
           content: parameters.map(function (parameter) {
             return String((parameter !== null && typeof parameter === 'object') ? JSON.stringify(parameter) : parameter);
           }).join(' '),
@@ -81,7 +81,7 @@ export function generateBypassConsoleInstaller() {
  * @param getWebView WebViewを取得する。
  * @returns リスナー
  */
-export function generateHostListener(getWebView: {
+export function generateWebViewHostListener(getWebView: {
   (): { injectJavaScript: { (script: string): void } } | null | undefined;
 }) {
   /**
@@ -99,7 +99,7 @@ export function generateHostListener(getWebView: {
       if (webView) {
         webView.injectJavaScript(
           `window[${generateTemplateLiteralString(
-            CEPC_KEY_HANDLE_GUEST,
+            CEPC_KEY_HANDLE_WEB_VIEW_GUEST,
           )}](${generateTemplateLiteralString(message)});true;`,
         );
       } else {

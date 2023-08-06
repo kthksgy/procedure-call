@@ -25,7 +25,7 @@ $ yarn add cepc-cepc-react-native-webview
 - This function creates entrypoint to window for communicating with WebView host.
 
 ```typescript
-startGuestHandler();
+startWebViewGuestHandler();
 ```
 
 ## WebView host usage
@@ -38,7 +38,7 @@ startGuestHandler();
 const webViewReference = useRef<WebView>(null);
 
 const listener = useMemo(function () {
-  return generateHostListener(function () {
+  return generateWebViewHostListener(function () {
     return webViewReference.current;
   });
 }, []);
