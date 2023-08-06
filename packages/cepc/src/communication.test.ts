@@ -2,15 +2,7 @@ import { afterEach } from 'node:test';
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import {
-  CEPC_ERROR_CODE_INTERNAL,
-  CepcError,
-  call,
-  callProcedure,
-  handle,
-  registerProcedure,
-  reset,
-} from './index';
+import { CepcError, call, callProcedure, handle, registerProcedure, reset } from './index';
 
 /**
  * 送信関数
@@ -116,6 +108,26 @@ test(`${CepcError.name}をそのまま返信する`, async function () {
   consoleDebugSpy.mockRestore();
 });
 
+test(`${CepcError.name}のエラーコードが空の場合に上書きする`, async function () {
+  expect.assertions(3);
+
+  /** `console.debug` */
+  const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(function () {});
+
+  registerProcedure('throw', async function () {
+    throw new CepcError();
+  });
+
+  await call('throw', undefined, post).catch(function (error) {
+    expect(error).toBeInstanceOf(CepcError);
+    expect(error.code).toBe('CEPC_INTERNAL');
+  });
+
+  expect(consoleDebugSpy).toHaveBeenCalledOnce();
+
+  consoleDebugSpy.mockRestore();
+});
+
 describe(`${CepcError.name}以外のエラーを変換する`, function () {
   /** カスタムエラー */
   class CustomError extends Error {}
@@ -130,7 +142,7 @@ describe(`${CepcError.name}以外のエラーを変換する`, function () {
     TypeError,
     URIError,
   ])(`%s`, async function (ErrorConstructor) {
-    expect.assertions(2);
+    expect.assertions(4);
 
     /** `console.error` */
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
@@ -140,9 +152,9 @@ describe(`${CepcError.name}以外のエラーを変換する`, function () {
     });
 
     await call('throw', undefined, post).catch(function (error) {
-      expect(error).toEqual(
-        expect.objectContaining({ code: CEPC_ERROR_CODE_INTERNAL, message: '' }),
-      );
+      expect(error).toBeInstanceOf(CepcError);
+      expect(error.code).toBe('CEPC_INTERNAL');
+      expect(error.message).toBe('');
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledOnce();
