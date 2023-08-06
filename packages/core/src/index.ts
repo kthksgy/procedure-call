@@ -160,7 +160,10 @@ type CepcProcedure<RequestData = any, ResponseData = any, Context extends object
    * @returns レスポンスデータ
    * @throws {CepcError} エラー
    */
-  (requestData: RequestData, context: CepcContext<RequestData, Context>): Promise<ResponseData>;
+  (
+    requestData: RequestData,
+    context: CepcContext<RequestData, Context>,
+  ): ResponseData | Promise<ResponseData>;
 };
 
 /**
@@ -225,28 +228,28 @@ type NeverOmitted<Type> = Type extends object
 export async function call<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
-  post: { (payloadString: string): void },
+  post: { (payloadString: string): void | PromiseLike<void> },
   options?: CepcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
+  /** キー */
+  const key = CEPC_IDENTIFIER + ':' + String(n++);
+
+  /** リクエスト */
+  const request: CepcRawPacket<'req'> = {
+    data: requestData,
+    index: 0,
+    key,
+    name,
+    p: CEPC_PROTOCOL,
+    timestamp: Date.now(),
+    t: 'req',
+    v: 0,
+  };
+
+  await Promise.resolve(post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request)));
+
   return new Promise(function (resolve, reject) {
-    /** キー */
-    const key = CEPC_IDENTIFIER + ':' + String(n++);
-
     callbacks.set(key, [resolve, reject]);
-
-    /** リクエスト */
-    const request: CepcRawPacket<'req'> = {
-      data: requestData,
-      index: 0,
-      key,
-      name,
-      p: CEPC_PROTOCOL,
-      timestamp: Date.now(),
-      t: 'req',
-      v: 0,
-    };
-
-    post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request));
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
       setTimeout(function () {
@@ -428,10 +431,10 @@ export function reset() {
  * @param post 送信関数
  * @param assist 補助関数
  */
-export function handle(
+export async function handle(
   payloadString: string,
-  post: { (payloadString: string, payload: CepcPacket<'req'>): void },
-  assist?: { (payloadString: string): void },
+  post: { (payloadString: string, payload: CepcPacket<'req'>): void | PromiseLike<void> },
+  assist?: { (payloadString: string): void | PromiseLike<void> },
 ) {
   /** ペイロード */
   const payload = parsePayloadString(payloadString);
@@ -441,7 +444,7 @@ export function handle(
         /** 手続き */
         const procedure = procedures.get(payload.name);
         if (procedure) {
-          procedure(payload.data, { payload })
+          await Promise.resolve(procedure(payload.data, { payload }))
             .then(function (responseData): CepcPacket<'res'> {
               return {
                 data: responseData,
@@ -484,23 +487,25 @@ export function handle(
               }
             })
             .then(function (response) {
-              post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
+              return post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
             });
         } else {
           console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
-          post(
-            CEPC_PAYLOAD_STRING_PREFIX +
-              JSON.stringify({
-                code: CEPC_ERROR_CODE_UNDEFINED,
-                index: payload.index + 1,
-                key: payload.key,
-                name: payload.name,
-                p: CEPC_PROTOCOL,
-                timestamp: Date.now(),
-                t: 'err',
-                v: 0,
-              } satisfies CepcPacket<'err'>),
-            payload,
+          await Promise.resolve(
+            post(
+              CEPC_PAYLOAD_STRING_PREFIX +
+                JSON.stringify({
+                  code: CEPC_ERROR_CODE_UNDEFINED,
+                  index: payload.index + 1,
+                  key: payload.key,
+                  name: payload.name,
+                  p: CEPC_PROTOCOL,
+                  timestamp: Date.now(),
+                  t: 'err',
+                  v: 0,
+                } satisfies CepcPacket<'err'>),
+              payload,
+            ),
           );
         }
         break;
@@ -534,7 +539,7 @@ export function handle(
     }
   } else {
     if (assist) {
-      assist(payloadString);
+      await Promise.resolve(assist(payloadString));
     } else {
       console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
     }
