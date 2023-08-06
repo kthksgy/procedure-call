@@ -16,7 +16,7 @@
     ".": {
       "import": "./lib/index.mjs",
       "require": "./lib/index.umd.js",
-      "types": "./lib/types/index.d.ts"
+      "types": "./lib/index.d.ts"
     }
   },
   "files": [
