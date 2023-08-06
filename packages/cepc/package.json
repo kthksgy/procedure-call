@@ -12,6 +12,16 @@
     "vite": "^4.4.8",
     "vitest": "^0.34.1"
   },
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.umd.js",
+      "types": "./lib/types/index.d.ts"
+    }
+  },
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "call",
     "cepc",
@@ -23,7 +33,8 @@
     "remote",
     "rpc"
   ],
-  "main": "index.js",
+  "main": "./lib/index.umd.cjs",
+  "module": "./lib/index.mjs",
   "name": "cepc",
   "repository": {
     "directory": "packages/cepc",

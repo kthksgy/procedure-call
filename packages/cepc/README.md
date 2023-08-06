@@ -10,6 +10,8 @@ CEPC has following features.
 - Supports `async` / `await`
 - Fully typed
 - Small (less than 5KB when Gzipped)
+- Standalone
+  - No dependencies !
 
 ## Context specific libraries
 
