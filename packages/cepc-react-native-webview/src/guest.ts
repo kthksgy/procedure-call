@@ -1,4 +1,4 @@
-import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, callTarget, handle } from 'cepc';
+import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, callTarget, handler } from 'cepc';
 
 import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
@@ -55,7 +55,7 @@ export async function webViewInjectionHandler(payloadString: string) {
     }
   };
 
-  await handle(payloadString, post);
+  await handler(payloadString, post);
 }
 
 /**

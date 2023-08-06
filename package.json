@@ -14,6 +14,9 @@
     "remark": "~14.0.3",
     "typescript": "^5.1.6"
   },
+  "scripts": {
+    "lint": "(cd packages/cepc && tsc) && (cd packages/cepc-react-native-webview && tsc) && (cd packages/cepc-service-worker && tsc) && eslint ."
+  },
   "workspaces": [
     "packages/cepc",
     "packages/cepc-react-native-webview",

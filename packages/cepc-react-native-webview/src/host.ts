@@ -4,7 +4,7 @@ import {
   NAME,
   call,
   generateTemplateLiteralString,
-  handle,
+  handler,
   isDefaultProcedureRegistered,
   registerDefaultProcedure,
 } from 'cepc';
@@ -88,7 +88,7 @@ export function generateWebViewMessageEventHandler(getWebView: {
    * リスナー
    * @param event イベント
    */
-  return function (event: { nativeEvent: { data: string } }) {
+  return async function (event: { nativeEvent: { data: string } }) {
     /** ペイロード文字列 */
     const payloadString = event.nativeEvent.data;
 
@@ -109,6 +109,6 @@ export function generateWebViewMessageEventHandler(getWebView: {
       }
     };
 
-    handle(payloadString, post);
+    await handler(payloadString, post);
   };
 }

@@ -1,0 +1,6 @@
+# ESLintによってデフォルトで除外されているパターンがあるので注意する。
+# https://eslint.org/docs/latest/user-guide/configuring/ignoring-code
+
+# ビルド出力ディレクトリ
+packages/*/coverage/
+packages/*/lib/

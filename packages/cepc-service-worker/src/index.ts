@@ -1,4 +1,4 @@
-import { NAME, callTarget, handle } from 'cepc';
+import { NAME, callTarget, handler } from 'cepc';
 
 import type { CepcPacket } from 'cepc';
 
@@ -21,7 +21,7 @@ export const callWindowClient = callTarget;
  * Message Event Handler
  * @param event Message Event
  */
-export function messageEventHandler(event: MessageEvent<string>) {
+export async function messageEventHandler(event: MessageEvent<string>) {
   if (typeof event.data === 'string' && event.data.length > 0) {
     /** 実行を許可されている場合、`true` */
     let allowed = false;
@@ -47,7 +47,7 @@ export function messageEventHandler(event: MessageEvent<string>) {
         }
       };
 
-      handle(event.data, post);
+      await handler(event.data, post);
     }
   }
 }
