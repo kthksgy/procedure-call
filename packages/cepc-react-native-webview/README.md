@@ -4,6 +4,7 @@
 
 ## Todos
 
+- Add tests
 - Write about how to call procedure
 
 ## Installation
