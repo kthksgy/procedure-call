@@ -90,17 +90,23 @@ test('タイムアウト', async function () {
 });
 
 test(`${CepcError.name}をそのまま返信する`, async function () {
-  expect.assertions(2);
+  expect.assertions(6);
 
   /** `console.debug` */
   const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(function () {});
 
   registerProcedure('throw', async function () {
-    throw new CepcError('1234', 'Visible Message');
+    /** 原因 */
+    const cause = new Error();
+    throw new CepcError('1234', 'Visible Message', { cause, data: { a: 1 } });
   });
 
   await call('throw', undefined, post).catch(function (error) {
-    expect(error).toEqual(expect.objectContaining({ code: '1234', message: 'Visible Message' }));
+    expect(error).toBeInstanceOf(CepcError);
+    expect(error.cause).toBe(undefined);
+    expect(error.code).toBe('1234');
+    expect(error.data).toStrictEqual({ a: 1 });
+    expect(error.message).toBe('Visible Message');
   });
 
   expect(consoleDebugSpy).toHaveBeenCalledOnce();
