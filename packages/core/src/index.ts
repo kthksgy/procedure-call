@@ -290,6 +290,127 @@ export async function callProcedure<RequestData, ResponseData>(
 }
 
 /**
+ * ペイロード文字列を処理する。
+ * @param payloadString ペイロード文字列
+ * @param post 送信関数
+ * @param assist 補助関数
+ */
+export async function handle(
+  payloadString: string,
+  post: { (payloadString: string, payload: CepcPacket<'req'>): void | PromiseLike<void> },
+  assist?: { (payloadString: string): void | PromiseLike<void> },
+) {
+  /** ペイロード */
+  const payload = parsePayloadString(payloadString);
+  if (payload !== undefined) {
+    switch (payload.t) {
+      case 'req': {
+        /** 手続き */
+        const procedure = procedures.get(payload.name);
+        if (procedure) {
+          await Promise.resolve(procedure(payload.data, { payload }))
+            .then(function (responseData): CepcPacket<'res'> {
+              return {
+                data: responseData,
+                index: payload.index + 1,
+                key: payload.key,
+                name: payload.name,
+                p: CEPC_PROTOCOL,
+                timestamp: Date.now(),
+                t: 'res',
+                v: 0,
+              };
+            })
+            .catch(function (error): CepcPacket<'err'> {
+              if (error instanceof CepcError) {
+                console.debug(error);
+                return {
+                  code: error.code || CEPC_ERROR_CODE_INTERNAL,
+                  ...(error.data !== undefined && { data: error.data }),
+                  index: payload.index + 1,
+                  key: payload.key,
+                  ...(error.message && { message: error.message }),
+                  name: payload.name,
+                  p: CEPC_PROTOCOL,
+                  timestamp: error.timestamp,
+                  t: 'err',
+                  v: 0,
+                };
+              } else {
+                console.error(error);
+                return {
+                  code: CEPC_ERROR_CODE_INTERNAL,
+                  index: payload.index + 1,
+                  key: payload.key,
+                  name: payload.name,
+                  p: CEPC_PROTOCOL,
+                  timestamp: Date.now(),
+                  t: 'err',
+                  v: 0,
+                };
+              }
+            })
+            .then(function (response) {
+              return post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
+            });
+        } else {
+          console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
+          await Promise.resolve(
+            post(
+              CEPC_PAYLOAD_STRING_PREFIX +
+                JSON.stringify({
+                  code: CEPC_ERROR_CODE_UNDEFINED,
+                  index: payload.index + 1,
+                  key: payload.key,
+                  name: payload.name,
+                  p: CEPC_PROTOCOL,
+                  timestamp: Date.now(),
+                  t: 'err',
+                  v: 0,
+                } satisfies CepcPacket<'err'>),
+              payload,
+            ),
+          );
+        }
+        break;
+      }
+      case 'res': {
+        /** コールバック */
+        const callback = callbacks.get(payload.key);
+        if (callback) {
+          callback[0](payload.data);
+          callbacks.delete(payload.key);
+        } else {
+          console.error(
+            `[${NAME}] リクエスト\`${payload.name}:${payload.key}\`のコールバックが存在しないため、レスポンスを受信できません。`,
+          );
+        }
+        break;
+      }
+      case 'err': {
+        /** コールバック */
+        const callback = callbacks.get(payload.key);
+        if (callback) {
+          callback[1](new CepcError(payload.code, payload.message, { data: payload.data }));
+          callbacks.delete(payload.key);
+        } else {
+          console.error(
+            `[${NAME}] リクエスト\`${payload.name}:${payload.key}\`のコールバックが存在しないため、エラーを受信できません。`,
+          );
+        }
+        break;
+      }
+    }
+  } else {
+    if (assist) {
+      await Promise.resolve(assist(payloadString));
+    } else {
+      console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
+    }
+  }
+}
+
+/**
  * 既定の手続きが登録されている場合、`true`を返す。
  * @param name 名前
  * @param procedure 手続き
@@ -423,127 +544,6 @@ export function reset() {
   defaultProcedures.clear();
   n = 0;
   procedures.clear();
-}
-
-/**
- * ペイロード文字列を処理する。
- * @param payloadString ペイロード文字列
- * @param post 送信関数
- * @param assist 補助関数
- */
-export async function handle(
-  payloadString: string,
-  post: { (payloadString: string, payload: CepcPacket<'req'>): void | PromiseLike<void> },
-  assist?: { (payloadString: string): void | PromiseLike<void> },
-) {
-  /** ペイロード */
-  const payload = parsePayloadString(payloadString);
-  if (payload !== undefined) {
-    switch (payload.t) {
-      case 'req': {
-        /** 手続き */
-        const procedure = procedures.get(payload.name);
-        if (procedure) {
-          await Promise.resolve(procedure(payload.data, { payload }))
-            .then(function (responseData): CepcPacket<'res'> {
-              return {
-                data: responseData,
-                index: payload.index + 1,
-                key: payload.key,
-                name: payload.name,
-                p: CEPC_PROTOCOL,
-                timestamp: Date.now(),
-                t: 'res',
-                v: 0,
-              };
-            })
-            .catch(function (error): CepcPacket<'err'> {
-              if (error instanceof CepcError) {
-                console.debug(error);
-                return {
-                  code: error.code || CEPC_ERROR_CODE_INTERNAL,
-                  ...(error.data !== undefined && { data: error.data }),
-                  index: payload.index + 1,
-                  key: payload.key,
-                  ...(error.message && { message: error.message }),
-                  name: payload.name,
-                  p: CEPC_PROTOCOL,
-                  timestamp: error.timestamp,
-                  t: 'err',
-                  v: 0,
-                };
-              } else {
-                console.error(error);
-                return {
-                  code: CEPC_ERROR_CODE_INTERNAL,
-                  index: payload.index + 1,
-                  key: payload.key,
-                  name: payload.name,
-                  p: CEPC_PROTOCOL,
-                  timestamp: Date.now(),
-                  t: 'err',
-                  v: 0,
-                };
-              }
-            })
-            .then(function (response) {
-              return post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
-            });
-        } else {
-          console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
-          await Promise.resolve(
-            post(
-              CEPC_PAYLOAD_STRING_PREFIX +
-                JSON.stringify({
-                  code: CEPC_ERROR_CODE_UNDEFINED,
-                  index: payload.index + 1,
-                  key: payload.key,
-                  name: payload.name,
-                  p: CEPC_PROTOCOL,
-                  timestamp: Date.now(),
-                  t: 'err',
-                  v: 0,
-                } satisfies CepcPacket<'err'>),
-              payload,
-            ),
-          );
-        }
-        break;
-      }
-      case 'res': {
-        /** コールバック */
-        const callback = callbacks.get(payload.key);
-        if (callback) {
-          callback[0](payload.data);
-          callbacks.delete(payload.key);
-        } else {
-          console.error(
-            `[${NAME}] リクエスト\`${payload.name}:${payload.key}\`のコールバックが存在しないため、レスポンスを受信できません。`,
-          );
-        }
-        break;
-      }
-      case 'err': {
-        /** コールバック */
-        const callback = callbacks.get(payload.key);
-        if (callback) {
-          callback[1](new CepcError(payload.code, payload.message, { data: payload.data }));
-          callbacks.delete(payload.key);
-        } else {
-          console.error(
-            `[${NAME}] リクエスト\`${payload.name}:${payload.key}\`のコールバックが存在しないため、エラーを受信できません。`,
-          );
-        }
-        break;
-      }
-    }
-  } else {
-    if (assist) {
-      await Promise.resolve(assist(payloadString));
-    } else {
-      console.error(`[${NAME}] ペイロード文字列\`${payloadString}\`が無効な形式です。`);
-    }
-  }
 }
 
 if (import.meta.vitest) {
