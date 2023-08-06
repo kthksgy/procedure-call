@@ -43,6 +43,7 @@
   },
   "scripts": {
     "build": "vite build && tsc --project tsconfig.build.json",
+    "clean": "rm -rf coverage && rm -rf lib",
     "coverage": "vitest run --coverage",
     "test": "vitest"
   },
