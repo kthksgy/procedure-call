@@ -154,12 +154,12 @@ export async function callTarget<RequestData, ResponseData>(
 }
 
 /**
- * ペイロード文字列を処理する。
+ * ハンドラー
  * @param payloadString ペイロード文字列
  * @param post 送信関数
  * @param assist 補助関数
  */
-export async function handle(
+export async function handler(
   payloadString: string,
   post: { (payloadString: string, payload: CepcPacket<'req'>): void | PromiseLike<void> },
   assist?: { (payloadString: string): void | PromiseLike<void> },
@@ -424,8 +424,8 @@ if (import.meta.vitest) {
     reset();
     expect(n).toBe(0);
     await call('procedure', undefined, async function post(payloadString: string) {
-      await handle(payloadString, async function (payloadString) {
-        await handle(payloadString, function () {});
+      await handler(payloadString, async function (payloadString) {
+        await handler(payloadString, function () {});
       });
     }).catch(function () {
       expect(consoleErrorSpy).toHaveBeenCalled();

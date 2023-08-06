@@ -2,7 +2,7 @@ import { afterEach } from 'node:test';
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { CepcError, call, callTarget, handle, registerProcedure, reset } from './index';
+import { CepcError, call, callTarget, handler, registerProcedure, reset } from './index';
 
 /**
  * 送信関数
@@ -11,8 +11,8 @@ import { CepcError, call, callTarget, handle, registerProcedure, reset } from '.
  * @description 自分自身に送信する。
  */
 function post(payloadString: string) {
-  handle(payloadString, function (payloadString) {
-    handle(payloadString, function () {});
+  handler(payloadString, function (payloadString) {
+    handler(payloadString, function () {});
   });
 }
 
@@ -189,7 +189,7 @@ test('補助関数', async function () {
 
   /** ペイロード文字列 */
   const payloadString = 'INVALID_PAYLOAD_STRING';
-  await handle(payloadString, post, assist);
+  await handler(payloadString, post, assist);
 
   expect(assist).toBeCalledWith(payloadString);
   expect(post).not.toHaveBeenCalled();
@@ -222,7 +222,7 @@ test('無効なペイロード文字列を受信した', async function () {
   /** `console.error` */
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-  await handle('', function () {});
+  await handler('', function () {});
   expect(consoleErrorSpy).toHaveBeenCalledWith('[CEPC] ペイロード文字列``が無効な形式です。');
 
   consoleErrorSpy.mockRestore();
@@ -234,7 +234,7 @@ test('コールバックが存在しない場合のレスポンス受信', async
   /** `console.error` */
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-  await handle(
+  await handler(
     'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
     function () {},
   );
@@ -251,7 +251,7 @@ test('コールバックが存在しない場合のエラー受信', async funct
   /** `console.error` */
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-  await handle(
+  await handler(
     'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
     function () {},
   );

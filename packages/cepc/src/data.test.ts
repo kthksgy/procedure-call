@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { call, handle, registerProcedure, reset } from './index';
+import { call, handler, registerProcedure, reset } from './index';
 
 /**
  * 送信関数
@@ -9,8 +9,8 @@ import { call, handle, registerProcedure, reset } from './index';
  * @description 自分自身に送信する。
  */
 function post(payloadString: string) {
-  handle(payloadString, function (payloadString) {
-    handle(payloadString, function () {});
+  handler(payloadString, function (payloadString) {
+    handler(payloadString, function () {});
   });
 }
 
