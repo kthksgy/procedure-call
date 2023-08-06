@@ -6,6 +6,18 @@
 
 - Write about how to call procedure
 
+## Installation
+
+Run command below.
+
+```
+# npm
+$ npm install cepc cepc-react-native-webview
+
+# yarn
+$ yarn add cepc-cepc-react-native-webview
+```
+
 ## WebView guest usage
 
 1. Call `startGuestHandler`
