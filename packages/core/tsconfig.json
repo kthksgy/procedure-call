@@ -6,7 +6,7 @@
     "declarationDir": "lib",
     "emitDeclarationOnly": true,
     "isolatedModules": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUnusedLocals": true,
