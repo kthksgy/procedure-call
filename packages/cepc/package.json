@@ -47,5 +47,5 @@
     "coverage": "vitest run --coverage",
     "test": "vitest"
   },
-  "version": "0.0.0"
+  "version": "0.0.1"
 }

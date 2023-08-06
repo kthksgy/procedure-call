@@ -37,7 +37,7 @@
   "module": "./lib/index.mjs",
   "name": "cepc-react-native-webview",
   "peerDependencies": {
-    "cepc": "^0.0.0"
+    "cepc": "^0.0.1"
   },
   "repository": {
     "directory": "packages/cepc-react-native-webview",
