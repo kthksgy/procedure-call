@@ -8,9 +8,9 @@ import { call, handle, registerProcedure, reset } from './index';
  *
  * @description 自分自身に送信する。
  */
-async function post(payloadString: string) {
-  await handle(payloadString, async function (payloadString) {
-    await handle(payloadString, function () {});
+function post(payloadString: string) {
+  handle(payloadString, function (payloadString) {
+    handle(payloadString, function () {});
   });
 }
 

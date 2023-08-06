@@ -1,9 +1,12 @@
+import { afterEach } from 'node:test';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   CEPC_ERROR_CODE_INTERNAL,
   CepcError,
   call,
+  callProcedure,
   handle,
   registerProcedure,
   reset,
@@ -15,9 +18,9 @@ import {
  *
  * @description 自分自身に送信する。
  */
-async function post(payloadString: string) {
-  await handle(payloadString, async function (payloadString) {
-    await handle(payloadString, function () {});
+function post(payloadString: string) {
+  handle(payloadString, function (payloadString) {
+    handle(payloadString, function () {});
   });
 }
 
@@ -25,7 +28,7 @@ beforeEach(function () {
   reset();
 });
 
-test('PING', async function () {
+test(`PING(${call.name})`, async function () {
   expect.assertions(1);
 
   registerProcedure('ping', async function () {
@@ -34,6 +37,63 @@ test('PING', async function () {
 
   await call<void, string>('ping', undefined, post).then(function (pong) {
     expect(pong).toBe('pong');
+  });
+});
+
+describe(`${callProcedure.name}`, function () {
+  beforeEach(function () {
+    registerProcedure('ping', async function () {
+      return 'pong';
+    });
+  });
+
+  afterEach(function () {
+    reset();
+  });
+
+  test(`PING`, async function () {
+    expect.assertions(1);
+
+    /** 対象 */
+    const target = {
+      postMessage(payloadString: string) {
+        post(payloadString);
+      },
+    };
+    await callProcedure(target, 'ping', undefined).then(function (pong) {
+      expect(pong).toBe('pong');
+    });
+  });
+
+  test(`対象が\`null\``, async function () {
+    expect.assertions(2);
+    await callProcedure(null, 'ping', undefined).catch(function (error) {
+      expect(error).toBeInstanceOf(CepcError);
+      expect(error.code).toBe('CEPC_UNINITIALIZED');
+    });
+  });
+
+  test(`対象が\`undefined\``, async function () {
+    expect.assertions(2);
+    await callProcedure(undefined, 'ping', undefined).catch(function (error) {
+      expect(error).toBeInstanceOf(CepcError);
+      expect(error.code).toBe('CEPC_UNINITIALIZED');
+    });
+  });
+});
+
+test('タイムアウト', async function () {
+  expect.assertions(2);
+
+  registerProcedure('10seconds', async function () {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, 10000);
+    });
+  });
+
+  await call('10seconds', undefined, post, { timeout: 100 }).catch(function (error) {
+    expect(error).toBeInstanceOf(CepcError);
+    expect(error.code).toBe('CEPC_TIMEOUT');
   });
 });
 
@@ -124,6 +184,18 @@ test('手続きが登録されていない', async function () {
   expect(consoleErrorSpy).toHaveBeenCalledWith(
     '[CEPC] 手続き`unknownProcedure`が登録されていません。',
   );
+
+  consoleErrorSpy.mockRestore();
+});
+
+test('無効なペイロード文字列を受信した', async function () {
+  expect.assertions(1);
+
+  /** `console.error` */
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+
+  await handle('', function () {});
+  expect(consoleErrorSpy).toHaveBeenCalledWith('[CEPC] ペイロード文字列``が無効な形式です。');
 
   consoleErrorSpy.mockRestore();
 });

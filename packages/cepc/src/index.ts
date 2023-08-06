@@ -469,7 +469,7 @@ export function isProcedureRegistered(name?: string, procedure?: any) {
 function parsePayloadString(
   payloadString: string,
 ): CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> | undefined {
-  if (payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
+  if (typeof payloadString === 'string' && payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
     try {
       /** ペイロード */
       const payload = JSON.parse(payloadString.slice(CEPC_PAYLOAD_STRING_PREFIX.length));
@@ -607,7 +607,7 @@ if (import.meta.vitest) {
       expect(parsePayloadString(payloadString)).toBeTruthy();
     });
 
-    test.each(['', 'abc', 'cepc::', 'cepc::abc'])(`Falsy %#`, function (payloadString) {
+    test.each(['', 'abc', 'cepc::', 'cepc::abc', 'cepc::{}'])(`Falsy %#`, function (payloadString) {
       expect(parsePayloadString(payloadString)).toBeFalsy();
     });
   });
