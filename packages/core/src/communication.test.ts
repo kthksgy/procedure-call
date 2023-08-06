@@ -15,9 +15,9 @@ import {
  *
  * @description 自分自身に送信する。
  */
-function post(payloadString: string) {
-  handle(payloadString, function (payloadString) {
-    handle(payloadString, function () {});
+async function post(payloadString: string) {
+  await handle(payloadString, async function (payloadString) {
+    await handle(payloadString, function () {});
   });
 }
 
@@ -91,7 +91,9 @@ describe(`${CepcError.name}以外のエラーを変換する`, function () {
   });
 });
 
-test('補助関数', function () {
+test('補助関数', async function () {
+  expect.assertions(2);
+
   /** 補助関数 */
   const assist = vi.fn();
   /** 送信関数 */
@@ -99,7 +101,7 @@ test('補助関数', function () {
 
   /** ペイロード文字列 */
   const payloadString = 'INVALID_PAYLOAD_STRING';
-  handle(payloadString, post, assist);
+  await handle(payloadString, post, assist);
 
   expect(assist).toBeCalledWith(payloadString);
   expect(post).not.toHaveBeenCalled();
@@ -126,11 +128,13 @@ test('手続きが登録されていない', async function () {
   consoleErrorSpy.mockRestore();
 });
 
-test('コールバックが存在しない場合のレスポンス受信', function () {
+test('コールバックが存在しない場合のレスポンス受信', async function () {
+  expect.assertions(1);
+
   /** `console.error` */
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-  handle(
+  await handle(
     'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
     function () {},
   );
@@ -141,11 +145,13 @@ test('コールバックが存在しない場合のレスポンス受信', funct
   consoleErrorSpy.mockRestore();
 });
 
-test('コールバックが存在しない場合のエラー受信', function () {
+test('コールバックが存在しない場合のエラー受信', async function () {
+  expect.assertions(1);
+
   /** `console.error` */
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-  handle(
+  await handle(
     'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
     function () {},
   );

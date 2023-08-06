@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 /** 名前 */
 export const NAME = 'CEPC';
@@ -246,9 +246,8 @@ export async function call<RequestData, ResponseData>(
     v: 0,
   };
 
-  await Promise.resolve(post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request)));
-
-  return new Promise(function (resolve, reject) {
+  /** プロミス */
+  const promise = new Promise<Jsonized<Awaited<ResponseData>, object>>(function (resolve, reject) {
     callbacks.set(key, [resolve, reject]);
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
@@ -258,6 +257,10 @@ export async function call<RequestData, ResponseData>(
       }, options.timeout);
     }
   });
+
+  await Promise.resolve(post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request)));
+
+  return promise;
 }
 
 /**
@@ -578,13 +581,21 @@ if (import.meta.vitest) {
     expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
   });
 
-  test(`${call.name}: \`n\`の増加`, function () {
+  test(`${call.name}: \`n\`の増加`, async function () {
+    expect.assertions(3);
+
+    /** `console.error` */
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+
     reset();
-
     expect(n).toBe(0);
-
-    call('procedure1', undefined, function () {});
-
+    await call('procedure', undefined, async function post(payloadString: string) {
+      await handle(payloadString, async function (payloadString) {
+        await handle(payloadString, function () {});
+      });
+    }).catch(function () {
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
     expect(n).toBe(1);
   });
 
@@ -594,16 +605,10 @@ if (import.meta.vitest) {
   });
 
   test(`${reset.name}`, function () {
-    reset();
-
-    call('procedure1', undefined, function () {});
-    registerDefaultProcedure('procedure2', async function () {});
-    registerProcedure('procedure3', async function () {});
-
-    expect(callbacks.size).not.toBe(0);
-    expect(n).not.toBe(0);
-    expect(defaultProcedures.size).not.toBe(0);
-    expect(procedures.size).not.toBe(0);
+    callbacks.set('TEST', [function () {}, function () {}]);
+    n = 123;
+    defaultProcedures.set('TEST', function () {});
+    procedures.set('TEST', function () {});
 
     reset();
 
