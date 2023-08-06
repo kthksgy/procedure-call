@@ -8,7 +8,7 @@ export default defineConfig(function () {
       lib: {
         entry: resolve(__dirname, 'src/index.ts'),
         fileName: 'index',
-        name: 'cepc',
+        name: 'index',
       },
       outDir: 'lib',
       sourcemap: true,
