@@ -599,9 +599,17 @@ if (import.meta.vitest) {
     expect(n).toBe(1);
   });
 
-  test(`${parsePayloadString.name}`, function () {
-    // TODO: テストを書く。
-    expect(1).toBe(1);
+  describe(`${parsePayloadString.name}`, function () {
+    test.each([
+      'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
+      'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
+    ])(`Truthy %#`, function (payloadString) {
+      expect(parsePayloadString(payloadString)).toBeTruthy();
+    });
+
+    test.each(['', 'abc', 'cepc::', 'cepc::abc'])(`Falsy %#`, function (payloadString) {
+      expect(parsePayloadString(payloadString)).toBeFalsy();
+    });
   });
 
   test(`${reset.name}`, function () {
