@@ -132,7 +132,7 @@ export async function call<RequestData, ResponseData>(
  * @param options オプション
  * @returns レスポンスデータ
  */
-export async function callProcedure<RequestData, ResponseData>(
+export async function callTarget<RequestData, ResponseData>(
   target: { postMessage: { (message: string): void } } | null | undefined,
   name: string,
   requestData: RequestData,

@@ -2,7 +2,7 @@ import { afterEach } from 'node:test';
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { CepcError, call, callProcedure, handle, registerProcedure, reset } from './index';
+import { CepcError, call, callTarget, handle, registerProcedure, reset } from './index';
 
 /**
  * 送信関数
@@ -32,7 +32,7 @@ test(`PING(${call.name})`, async function () {
   });
 });
 
-describe(`${callProcedure.name}`, function () {
+describe(`${callTarget.name}`, function () {
   beforeEach(function () {
     registerProcedure('ping', async function () {
       return 'pong';
@@ -52,7 +52,7 @@ describe(`${callProcedure.name}`, function () {
         post(payloadString);
       },
     };
-    await callProcedure(target, 'ping', undefined).then(function (pong) {
+    await callTarget(target, 'ping', undefined).then(function (pong) {
       expect(pong).toBe('pong');
     });
   });
@@ -71,7 +71,7 @@ describe(`${callProcedure.name}`, function () {
     /** `console.error` */
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
-    await callProcedure(target, 'ping', undefined).catch(function (error) {
+    await callTarget(target, 'ping', undefined).catch(function (error) {
       expect(error).toBeInstanceOf(CepcError);
       expect(error.code).toBe('CEPC_UNINITIALIZED');
     });
