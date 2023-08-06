@@ -1,12 +1,13 @@
 # CEPC - Contextual External Procedure Call
 
-CEPC is an interface designed for communication across different contexts, such as Window, React Native WebView or Service Worker.
+CEPC is a procedure call interface designed for communication across different contexts, such as Window, React Native WebView or Service Worker.
 
 CEPC has following features.
 
 - Simple
 - High compatibility
   - Can be used when two contexts can send string each other !
+- Supports `async` / `await`
 - Fully typed
 - Small (less than 5KB when Gzipped)
 
