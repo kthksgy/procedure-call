@@ -16,8 +16,8 @@ There are some context specific libraries for CEPC.
 
 If you are planning to use CEPC with these ccontexts, try it first !
 
-- [React Native WebView](/kthksgy/cepc/tree/main/packages/cepc-react-native-webview)
-- [Service Worker](/kthksgy/cepc/tree/main/packages/cepc-service-worker)
+- [React Native WebView](../cepc-react-native-webview)
+- [Service Worker](../cepc-service-worker)
 
 ## Installation
 
