@@ -7,6 +7,7 @@ import {
   CEPC_ERROR_CODE_UNINITIALIZED,
   CEPC_PAYLOAD_STRING_PREFIX,
   CEPC_PROTOCOL,
+  CepcError,
   NAME,
   VERSION,
   isDefaultProcedureRegistered,
@@ -31,6 +32,21 @@ describe('定数定義', function () {
   });
 });
 
+describe(`${CepcError.name}`, function () {
+  test('インスタンス化', function () {
+    /** 原因 */
+    const cause = new Error();
+    /** エラー */
+    const error = new CepcError('abc', 'メッセージです。', { cause, data: { a: 1 } });
+
+    expect(error).toBeInstanceOf(CepcError);
+    expect(error.cause).toBe(cause);
+    expect(error.code).toBe('abc');
+    expect(error.data).toStrictEqual({ a: 1 });
+    expect(error.message).toBe('メッセージです。');
+  });
+});
+
 test(`${isDefaultProcedureRegistered.name}`, function () {
   reset();
 
@@ -41,17 +57,22 @@ test(`${isDefaultProcedureRegistered.name}`, function () {
     return true;
   }
 
+  expect(isDefaultProcedureRegistered()).toBe(false);
   expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
+  expect(isDefaultProcedureRegistered(undefined, procedure)).toBe(false);
 
   /** 登録を解除する。 */
   const unregister = registerDefaultProcedure(procedureName, procedure);
 
+  expect(isDefaultProcedureRegistered()).toBe(false);
   expect(isDefaultProcedureRegistered(procedureName)).toBe(true);
   expect(isDefaultProcedureRegistered(procedureName, procedure)).toBe(true);
+  expect(isDefaultProcedureRegistered(undefined, procedure)).toBe(true);
 
   unregister();
 
   expect(isDefaultProcedureRegistered(procedureName)).toBe(false);
+  expect(isDefaultProcedureRegistered(undefined, procedure)).toBe(false);
 });
 
 test(`${isProcedureRegistered.name}`, function () {
@@ -64,17 +85,23 @@ test(`${isProcedureRegistered.name}`, function () {
     return true;
   }
 
+  expect(isProcedureRegistered()).toBe(false);
   expect(isProcedureRegistered(procedureName)).toBe(false);
+  expect(isProcedureRegistered(undefined, procedure)).toBe(false);
 
   /** 登録を解除する。 */
   const unregister = registerProcedure(procedureName, procedure);
 
+  expect(isProcedureRegistered()).toBe(false);
   expect(isProcedureRegistered(procedureName)).toBe(true);
   expect(isProcedureRegistered(procedureName, procedure)).toBe(true);
+  expect(isProcedureRegistered(undefined, procedure)).toBe(true);
 
   unregister();
 
+  expect(isProcedureRegistered()).toBe(false);
   expect(isProcedureRegistered(procedureName)).toBe(false);
+  expect(isProcedureRegistered(undefined, procedure)).toBe(false);
 });
 
 describe(`${registerDefaultProcedure.name}`, function () {
