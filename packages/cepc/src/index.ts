@@ -1,5 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
+import { generateDuosexagesimalString, generateRandomString } from './utilities';
+
 import type {
   CepcErrorOptions,
   CepcPacket,
@@ -9,42 +11,14 @@ import type {
   Jsonized,
 } from './types';
 
+export * from './utilities';
+
 export type * from './types';
 
 /** 名前 */
 export const NAME = 'CEPC';
 /** バージョン */
 export const VERSION = __version;
-
-/** 文字 */
-const CHARACTERS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-
-/**
- * 62進数文字列を生成する。
- * @param x 10進数
- * @returns 62進数文字列
- */
-function generateDuosexagesimalString(x: number) {
-  /** 文字 */
-  const characters = [];
-  for (; x > 0; x = Math.floor(x / CHARACTERS.length)) {
-    characters.unshift(CHARACTERS.at(x % CHARACTERS.length));
-  }
-  return characters.length > 0 ? characters.join('') : '0';
-}
-
-/**
- * 乱文字列
- * @param length 文字数
- * @returns 乱文字列
- */
-function generateRandomString(length: number) {
-  return Array.from({ length: Math.max(length, 0) })
-    .map(function () {
-      return CHARACTERS[Math.floor(CHARACTERS.length * Math.random())];
-    })
-    .join('');
-}
 
 /** CEPCエラーコード: 内部エラー */
 export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
@@ -437,33 +411,6 @@ export function reset() {
 }
 
 if (import.meta.vitest) {
-  test('数字／英大文字／英小文字の文字数', function () {
-    expect(CHARACTERS.length).toBe(10 + 26 * 2);
-  });
-
-  describe(`${generateDuosexagesimalString.name}`, function () {
-    test.each([
-      [0, '0'],
-      [1, '1'],
-      [61, 'z'],
-      [62, '10'],
-    ])(`${generateDuosexagesimalString.name}(%d) => "%s"`, function (n, s) {
-      expect(generateDuosexagesimalString(n)).toBe(s);
-    });
-  });
-
-  test(`${generateRandomString.name}: 0文字から64文字までの生成`, function () {
-    expect(generateRandomString(0)).toBe('');
-    expect(generateRandomString(-1)).toBe('');
-    for (let length = 1; length <= 64; length++) {
-      /** 正規表現 */
-      const regularExpression = new RegExp(`^[0-9A-Za-z]{${length}}$`);
-      for (let i = 0; i < 128; i++) {
-        expect(generateRandomString(length)).toMatch(regularExpression);
-      }
-    }
-  });
-
   test(`識別子"${CEPC_IDENTIFIER}"の形式`, function () {
     expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
   });
