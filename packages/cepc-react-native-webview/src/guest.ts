@@ -58,7 +58,11 @@ export async function handleWebViewGuest(payloadString: string) {
   await handle(payloadString, post);
 }
 
-export function startWebViewGuestHandler() {
+/**
+ * WebView Guestのリスナーを開始する。
+ * @returns 停止する。
+ */
+export function startWebViewGuestListener() {
   if (typeof window === 'object' && window !== null) {
     // `window`に公開する。
     window[CEPC_KEY_CALL_WEB_VIEW_HOST] = callWebViewHost;
@@ -66,10 +70,13 @@ export function startWebViewGuestHandler() {
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
-  return stopWebViewGuestHandler;
+  return stopWebViewGuestListener;
 }
 
-export function stopWebViewGuestHandler() {
+/**
+ * WebView Guestのリスナーを停止する。
+ */
+export function stopWebViewGuestListener() {
   if (typeof window === 'object' && window !== null) {
     window[CEPC_KEY_CALL_WEB_VIEW_HOST] = undefined;
     window[CEPC_KEY_HANDLE_WEB_VIEW_GUEST] = undefined;
