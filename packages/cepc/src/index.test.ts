@@ -34,6 +34,17 @@ describe('定数定義', function () {
 
 describe(`${CepcError.name}`, function () {
   test('インスタンス化', function () {
+    /** エラー */
+    const error = new CepcError();
+
+    expect(error).toBeInstanceOf(CepcError);
+    expect(error.cause).toBe(undefined);
+    expect(error.code).toBe('');
+    expect(error.data).toBe(undefined);
+    expect(error.message).toBe('');
+  });
+
+  test('インスタンス化(フルオプション)', function () {
     /** 原因 */
     const cause = new Error();
     /** エラー */
