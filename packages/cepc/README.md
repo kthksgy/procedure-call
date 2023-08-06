@@ -2,6 +2,14 @@
 
 CEPC is a procedure call interface designed for communication across different contexts, such as Window, React Native WebView or Service Worker.
 
+## Todos
+
+- Complete `README.md` and other documents
+- Translate commonly visible Japanese comments to English
+  - Currently, almost all comments which can be displayed in VSCode are Japanese.
+
+## Features
+
 CEPC has following features.
 
 - Simple
