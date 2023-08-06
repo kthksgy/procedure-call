@@ -1003,21 +1003,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cepc-react-native-webview@workspace:packages/react-native-webview":
+"cepc-react-native-webview@workspace:packages/cepc-react-native-webview":
   version: 0.0.0-use.local
-  resolution: "cepc-react-native-webview@workspace:packages/react-native-webview"
+  resolution: "cepc-react-native-webview@workspace:packages/cepc-react-native-webview"
   languageName: unknown
   linkType: soft
 
-"cepc-service-worker@workspace:packages/service-worker":
+"cepc-service-worker@workspace:packages/cepc-service-worker":
   version: 0.0.0-use.local
-  resolution: "cepc-service-worker@workspace:packages/service-worker"
+  resolution: "cepc-service-worker@workspace:packages/cepc-service-worker"
   languageName: unknown
   linkType: soft
 
-"cepc@workspace:packages/core":
+"cepc@workspace:packages/cepc":
   version: 0.0.0-use.local
-  resolution: "cepc@workspace:packages/core"
+  resolution: "cepc@workspace:packages/cepc"
   dependencies:
     "@types/node": ~18
     "@vitest/coverage-v8": ^0.34.1
