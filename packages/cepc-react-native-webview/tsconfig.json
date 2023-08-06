@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "declaration": true,
     "declarationDir": "lib",
     "declarationMap": true,
-    "emitDeclarationOnly": true,
     "isolatedModules": true,
     "lib": ["ES2022"],
     "module": "ESNext",

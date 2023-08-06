@@ -42,7 +42,7 @@
     "url": "https://github.com/kthksgy/cepc.git"
   },
   "scripts": {
-    "build": "vite build && tsc --project tsconfig.build.json",
+    "build": "vite build && tsc --emitDeclarationOnly --project tsconfig.build.json",
     "clean": "rm -rf coverage && rm -rf lib",
     "coverage": "vitest run --coverage",
     "test": "vitest"
