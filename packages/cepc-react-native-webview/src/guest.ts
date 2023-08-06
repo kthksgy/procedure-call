@@ -1,6 +1,6 @@
 import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, callTarget, handle } from 'cepc';
 
-import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_HANDLE_WEB_VIEW_GUEST } from './common';
+import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
 import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
 
@@ -33,10 +33,10 @@ export function isWebViewGuest() {
 }
 
 /**
- * WebView Guestの処理関数
+ * WebView Injection Handler
  * @param payloadString ペイロード文字列
  */
-export async function handleWebViewGuest(payloadString: string) {
+export async function webViewInjectionHandler(payloadString: string) {
   /** 送信関数 */
   const post = function (message: string, payload: CepcPacket<'req'>) {
     if (
@@ -62,24 +62,24 @@ export async function handleWebViewGuest(payloadString: string) {
  * WebView Guestのリスナーを開始する。
  * @returns 停止する。
  */
-export function startWebViewGuestListener() {
+export function startWebViewInjectionHandler() {
   if (typeof window === 'object' && window !== null) {
     // `window`に公開する。
     window[CEPC_KEY_CALL_WEB_VIEW_HOST] = callWebViewHost;
-    window[CEPC_KEY_HANDLE_WEB_VIEW_GUEST] = handleWebViewGuest;
+    window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER] = webViewInjectionHandler;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
-  return stopWebViewGuestListener;
+  return stopWebViewInjectionHandler;
 }
 
 /**
  * WebView Guestのリスナーを停止する。
  */
-export function stopWebViewGuestListener() {
+export function stopWebViewInjectionHandler() {
   if (typeof window === 'object' && window !== null) {
     window[CEPC_KEY_CALL_WEB_VIEW_HOST] = undefined;
-    window[CEPC_KEY_HANDLE_WEB_VIEW_GUEST] = undefined;
+    window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER] = undefined;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
@@ -93,7 +93,7 @@ declare global {
     [CEPC_KEY_CALL_WEB_VIEW_HOST]?: {
       (name: string, requestData: unknown, options?: CepcProcedureCallOptions): Promise<unknown>;
     };
-    [CEPC_KEY_HANDLE_WEB_VIEW_GUEST]?: { (payloadString: string): void };
+    [CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]?: { (payloadString: string): void };
   }
 
   let window: Window;

@@ -9,7 +9,7 @@ import {
   registerDefaultProcedure,
 } from 'cepc';
 
-import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_HANDLE_WEB_VIEW_GUEST } from './common';
+import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
 import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
 
@@ -36,7 +36,7 @@ export async function callWebViewGuest<RequestData, ResponseData>(
     const post = function (message: string) {
       webView.injectJavaScript(
         `window[${generateTemplateLiteralString(
-          CEPC_KEY_HANDLE_WEB_VIEW_GUEST,
+          CEPC_KEY_WEB_VIEW_INJECTION_HANDLER,
         )}](${generateTemplateLiteralString(message)});true;`,
       );
     };
@@ -77,11 +77,11 @@ export function generateBypassConsoleInstaller() {
 }
 
 /**
- * WebView Hostのリスナーを生成する。
+ * Generate WebView Message Event Handler
  * @param getWebView WebViewを取得する。
  * @returns リスナー
  */
-export function generateWebViewHostListener(getWebView: {
+export function generateWebViewMessageEventHandler(getWebView: {
   (): { injectJavaScript: { (script: string): void } } | null | undefined;
 }) {
   /**
@@ -99,7 +99,7 @@ export function generateWebViewHostListener(getWebView: {
       if (webView) {
         webView.injectJavaScript(
           `window[${generateTemplateLiteralString(
-            CEPC_KEY_HANDLE_WEB_VIEW_GUEST,
+            CEPC_KEY_WEB_VIEW_INJECTION_HANDLER,
           )}](${generateTemplateLiteralString(message)});true;`,
         );
       } else {
