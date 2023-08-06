@@ -1,4 +1,4 @@
-import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, call, handle } from 'cepc';
+import { CEPC_ERROR_CODE_UNINITIALIZED, CepcError, NAME, callTarget, handle } from 'cepc';
 
 import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_HANDLE_WEB_VIEW_GUEST } from './common';
 
@@ -16,16 +16,8 @@ export async function callWebViewHost<RequestData, ResponseData>(
   requestData: RequestData,
   options?: CepcProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
-  if (
-    typeof window === 'object' &&
-    window !== null &&
-    typeof window.ReactNativeWebView === 'object' &&
-    window.ReactNativeWebView !== null &&
-    typeof window.ReactNativeWebView.postMessage === 'function'
-  ) {
-    /** 送信関数 */
-    const post = window.ReactNativeWebView.postMessage.bind(window.ReactNativeWebView);
-    return call(name, requestData, post, options);
+  if (typeof window === 'object' && window !== null) {
+    return callTarget(window.ReactNativeWebView, name, requestData, options);
   } else {
     console.error(
       `[${NAME}] \`window.ReactNativeWebView.postMessage()\`が初期化されていないため、` +
