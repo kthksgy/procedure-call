@@ -35,11 +35,9 @@ export async function callHost<RequestData, ResponseData>(
   }
 }
 
-/** WebViewである場合、`true`を返す。 */
+/** WebView Guestである場合、`true`を返す。 */
 export function isWebView() {
-  return Boolean(
-    typeof window === 'object' && window !== null && window.ReactNativeWebView !== undefined,
-  );
+  return typeof window === 'object' && window !== null && Boolean(window.ReactNativeWebView);
 }
 
 /**
