@@ -57,20 +57,30 @@ describe(`${callProcedure.name}`, function () {
     });
   });
 
-  test(`対象が\`null\``, async function () {
-    expect.assertions(2);
-    await callProcedure(null, 'ping', undefined).catch(function (error) {
-      expect(error).toBeInstanceOf(CepcError);
-      expect(error.code).toBe('CEPC_UNINITIALIZED');
-    });
-  });
+  test.each([
+    {},
+    { postMessage: 0 },
+    { postMessage: 1 },
+    { postMessage: '' },
+    { postMessage: 'abc' },
+    null,
+    undefined,
+  ])(`対象が\`%s\``, async function (target: any) {
+    expect.assertions(3);
 
-  test(`対象が\`undefined\``, async function () {
-    expect.assertions(2);
-    await callProcedure(undefined, 'ping', undefined).catch(function (error) {
+    /** `console.error` */
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
+
+    await callProcedure(target, 'ping', undefined).catch(function (error) {
       expect(error).toBeInstanceOf(CepcError);
       expect(error.code).toBe('CEPC_UNINITIALIZED');
     });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[CEPC] `target.postMessage`が初期化されていないため、手続き`ping`のリクエストを送信できません。',
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 });
 
