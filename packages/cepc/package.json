@@ -47,5 +47,6 @@
     "coverage": "vitest run --coverage",
     "test": "vitest"
   },
-  "version": "0.0.1"
+  "types": "./lib/index.d.ts",
+  "version": "0.0.2"
 }
