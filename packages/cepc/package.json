@@ -21,6 +21,7 @@
   "files": [
     "lib"
   ],
+  "homepage": "https://github.com/kthksgy/cepc/tree/main/packages/cepc",
   "keywords": [
     "call",
     "cepc",
