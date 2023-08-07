@@ -36,7 +36,7 @@
   "module": "./lib/index.mjs",
   "name": "cepc-react-native-web-view",
   "peerDependencies": {
-    "cepc": "^0.0.4"
+    "cepc": "^0.0.5"
   },
   "repository": {
     "directory": "packages/cepc-react-native-web-view",
@@ -50,5 +50,5 @@
     "test": "vitest"
   },
   "types": "./lib/index.d.ts",
-  "version": "0.0.0"
+  "version": "0.0.1"
 }

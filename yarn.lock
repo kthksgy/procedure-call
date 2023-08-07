@@ -1021,6 +1021,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cepc-inline-frame@workspace:packages/cepc-inline-frame":
+  version: 0.0.0-use.local
+  resolution: "cepc-inline-frame@workspace:packages/cepc-inline-frame"
+  dependencies:
+    "@vitest/coverage-v8": ^0.34.1
+    typescript: ^5.1.6
+    vite: ^4.4.9
+    vitest: ^0.34.1
+  peerDependencies:
+    cepc: ^0.0.4
+  languageName: unknown
+  linkType: soft
+
 "cepc-react-native-web-view@workspace:packages/cepc-react-native-web-view":
   version: 0.0.0-use.local
   resolution: "cepc-react-native-web-view@workspace:packages/cepc-react-native-web-view"
@@ -1037,6 +1050,19 @@ __metadata:
 "cepc-service-worker@workspace:packages/cepc-service-worker":
   version: 0.0.0-use.local
   resolution: "cepc-service-worker@workspace:packages/cepc-service-worker"
+  dependencies:
+    "@vitest/coverage-v8": ^0.34.1
+    typescript: ^5.1.6
+    vite: ^4.4.9
+    vitest: ^0.34.1
+  peerDependencies:
+    cepc: ^0.0.4
+  languageName: unknown
+  linkType: soft
+
+"cepc-window@workspace:packages/cepc-window":
+  version: 0.0.0-use.local
+  resolution: "cepc-window@workspace:packages/cepc-window"
   dependencies:
     "@vitest/coverage-v8": ^0.34.1
     typescript: ^5.1.6

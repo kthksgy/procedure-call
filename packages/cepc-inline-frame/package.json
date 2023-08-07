@@ -36,7 +36,7 @@
   "module": "./lib/index.mjs",
   "name": "cepc-inline-frame",
   "peerDependencies": {
-    "cepc": "^0.0.4"
+    "cepc": "^0.0.5"
   },
   "repository": {
     "directory": "packages/cepc-inline-frame",
