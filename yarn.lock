@@ -1003,9 +1003,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cepc-react-native-webview@workspace:packages/cepc-react-native-webview":
+"cepc-react-native-web-view@workspace:packages/cepc-react-native-web-view":
   version: 0.0.0-use.local
-  resolution: "cepc-react-native-webview@workspace:packages/cepc-react-native-webview"
+  resolution: "cepc-react-native-web-view@workspace:packages/cepc-react-native-web-view"
   dependencies:
     "@types/node": ~18
     "@vitest/coverage-v8": ^0.34.1

@@ -13,10 +13,10 @@ Run command below.
 
 ```
 # npm
-$ npm install cepc cepc-react-native-webview
+$ npm install cepc cepc-react-native-web-view
 
 # yarn
-$ yarn add cepc-cepc-react-native-webview
+$ yarn add cepc-cepc-react-native-web-view
 ```
 
 ## WebView guest usage
