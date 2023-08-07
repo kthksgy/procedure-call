@@ -33,7 +33,7 @@
     "remote",
     "rpc"
   ],
-  "main": "./lib/index.umd.cjs",
+  "main": "./lib/index.umd.js",
   "module": "./lib/index.mjs",
   "name": "cepc",
   "repository": {
@@ -48,5 +48,5 @@
     "test": "vitest"
   },
   "types": "./lib/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }

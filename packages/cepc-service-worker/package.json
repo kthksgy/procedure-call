@@ -33,7 +33,7 @@
     "remote",
     "rpc"
   ],
-  "main": "./lib/index.umd.cjs",
+  "main": "./lib/index.umd.js",
   "module": "./lib/index.mjs",
   "name": "cepc-service-worker",
   "peerDependencies": {
@@ -51,5 +51,5 @@
     "test": "vitest"
   },
   "types": "./lib/index.d.ts",
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
