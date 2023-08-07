@@ -12,7 +12,7 @@ $ npm i -D \
   '@typescript-eslint/parser@~6.2.1' \
   'confusing-browser-globals@~1.0.11' \
   'eslint@~8.46.0' \
-  'eslint-config-prettier@~8.10.0' \
+  'eslint-config-prettier@~9.0.0' \
   'eslint-import-resolver-typescript@~3.5.5' \
   'eslint-plugin-import@~2.26.0'
 
