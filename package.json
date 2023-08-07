@@ -19,7 +19,9 @@
   },
   "workspaces": [
     "packages/cepc",
+    "packages/cepc-inline-frame",
     "packages/cepc-react-native-web-view",
-    "packages/cepc-service-worker"
+    "packages/cepc-service-worker",
+    "packages/cepc-window"
   ]
 }

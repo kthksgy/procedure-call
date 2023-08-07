@@ -1,0 +1,54 @@
+{
+  "author": {
+    "name": "kthksgy",
+    "url": "https://github.com/kthksgy"
+  },
+  "license": "MIT",
+  "description": "CEPC Inline Frame",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^0.34.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.9",
+    "vitest": "^0.34.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.umd.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "call",
+    "cepc",
+    "communication",
+    "interface",
+    "local",
+    "lpc",
+    "procedure",
+    "remote",
+    "rpc"
+  ],
+  "main": "./lib/index.umd.js",
+  "module": "./lib/index.mjs",
+  "name": "cepc-inline-frame",
+  "peerDependencies": {
+    "cepc": "^0.0.4"
+  },
+  "repository": {
+    "directory": "packages/cepc-inline-frame",
+    "type": "git",
+    "url": "https://github.com/kthksgy/cepc.git"
+  },
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --project tsconfig.build.json",
+    "clean": "rm -rf coverage && rm -rf lib",
+    "coverage": "vitest run --coverage",
+    "test": "vitest"
+  },
+  "types": "./lib/index.d.ts",
+  "version": "0.0.0"
+}
