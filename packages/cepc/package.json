@@ -36,6 +36,7 @@
   "main": "./lib/index.umd.js",
   "module": "./lib/index.mjs",
   "name": "cepc",
+  "peerDependencies": {},
   "repository": {
     "directory": "packages/cepc",
     "type": "git",
