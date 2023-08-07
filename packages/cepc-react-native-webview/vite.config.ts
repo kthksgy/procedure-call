@@ -2,6 +2,8 @@ import { resolve } from 'path';
 
 import { defineConfig } from 'vite';
 
+import { peerDependencies } from './package.json';
+
 export default defineConfig(function () {
   return {
     build: {
@@ -11,6 +13,23 @@ export default defineConfig(function () {
         name: 'index',
       },
       outDir: 'lib',
+      rollupOptions: {
+        external: [...Object.keys(peerDependencies)],
+        output: {
+          globals: {
+            ...Object.fromEntries(
+              Object.keys(peerDependencies).map(function (key) {
+                return [
+                  key,
+                  key.replace(/(?:^|-)(.)/g, function (_, character: string) {
+                    return character.toUpperCase();
+                  }),
+                ];
+              }),
+            ),
+          },
+        },
+      },
       sourcemap: true,
     },
 
