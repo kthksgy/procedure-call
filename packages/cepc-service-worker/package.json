@@ -37,7 +37,7 @@
   "module": "./lib/index.mjs",
   "name": "cepc-service-worker",
   "peerDependencies": {
-    "cepc": "^0.0.1"
+    "cepc": "^0.0.4"
   },
   "repository": {
     "directory": "packages/cepc-service-worker",
@@ -51,5 +51,5 @@
     "test": "vitest"
   },
   "types": "./lib/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
