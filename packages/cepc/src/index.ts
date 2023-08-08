@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 
+import { NAME } from './package';
 import { generateDuosexagesimalString, generateRandomString } from './utilities';
 
 import type {
@@ -11,14 +12,10 @@ import type {
   Jsonized,
 } from './types';
 
+export * from './package';
 export * from './utilities';
 
 export type * from './types';
-
-/** 名前 */
-export const NAME = 'CEPC';
-/** バージョン */
-export const VERSION = __version;
 
 /** CEPCエラーコード: 内部エラー */
 export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
