@@ -1,6 +1,6 @@
 /**
  * @file ESLintの設定ファイル
- * @version 1.3.0
+ * @version 1.3.1
  *
  * @tutorial VSCodeで使用している場合、変更を行った後は必ず再起動する。
  */
@@ -8,8 +8,8 @@
 /*
 # 必須のパッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
 $ npm i -D \
-  '@typescript-eslint/eslint-plugin@~6.2.1' \
-  '@typescript-eslint/parser@~6.2.1' \
+  '@typescript-eslint/eslint-plugin@~6.3.0' \
+  '@typescript-eslint/parser@~6.3.0' \
   'confusing-browser-globals@~1.0.11' \
   'eslint@~8.46.0' \
   'eslint-config-prettier@~9.0.0' \
