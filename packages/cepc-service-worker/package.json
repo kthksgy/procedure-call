@@ -36,7 +36,7 @@
   "module": "./lib/index.mjs",
   "name": "@kthksgy/procedure-call-service-worker",
   "peerDependencies": {
-    "procedure-call": "^0.0.5"
+    "@kthksgy/procedure-call": "^0.0.0"
   },
   "repository": {
     "directory": "packages/procedure-call-service-worker",
