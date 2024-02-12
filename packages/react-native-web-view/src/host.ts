@@ -9,7 +9,10 @@ import {
   registerDefaultProcedure,
 } from '@kthksgy/procedure-call';
 
-import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
+import {
+  PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST,
+  PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER,
+} from './common';
 
 import type { Jsonized, ProcedureCallOptions, ProcedureCallPacket } from '@kthksgy/procedure-call';
 
@@ -36,7 +39,7 @@ export async function callWebViewGuest<RequestData, ResponseData>(
     const post = function (message: string) {
       webView.injectJavaScript(
         `window[${generateTemplateLiteralString(
-          CEPC_KEY_WEB_VIEW_INJECTION_HANDLER,
+          PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER,
         )}](${generateTemplateLiteralString(message)});true;`,
       );
     };
@@ -65,7 +68,7 @@ export function generateBypassConsoleInstaller() {
 
   return `console = {...console, ...Object.fromEntries(['debug', 'error', 'info', 'log', 'warn'].map(function (level) {
     return [level, function (...parameters) {
-        window[${generateTemplateLiteralString(CEPC_KEY_CALL_WEB_VIEW_HOST)}]('bypassConsole', {
+        window[${generateTemplateLiteralString(PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST)}]('bypassConsole', {
           content: parameters.map(function (parameter) {
             return String((parameter !== null && typeof parameter === 'object') ? JSON.stringify(parameter) : parameter);
           }).join(' '),
@@ -99,7 +102,7 @@ export function generateWebViewMessageEventHandler(getWebView: {
       if (webView) {
         webView.injectJavaScript(
           `window[${generateTemplateLiteralString(
-            CEPC_KEY_WEB_VIEW_INJECTION_HANDLER,
+            PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER,
           )}](${generateTemplateLiteralString(message)});true;`,
         );
       } else {

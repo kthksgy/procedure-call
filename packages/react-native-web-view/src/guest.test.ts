@@ -1,6 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
+import {
+  PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST,
+  PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER,
+} from './common';
 import {
   callWebViewHost,
   isWebViewGuest,
@@ -12,14 +15,14 @@ import {
 describe(`${startWebViewInjectionHandler.name} & ${stopWebViewInjectionHandler.name}`, function () {
   test('正常に登録と登録解除ができる', function () {
     vi.stubGlobal('window', {});
-    expect(window[CEPC_KEY_CALL_WEB_VIEW_HOST]).toBeUndefined();
-    expect(window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]).toBeUndefined();
+    expect(window[PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST]).toBeUndefined();
+    expect(window[PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER]).toBeUndefined();
     startWebViewInjectionHandler();
-    expect(window[CEPC_KEY_CALL_WEB_VIEW_HOST]).toBe(callWebViewHost);
-    expect(window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]).toBe(webViewInjectionHandler);
+    expect(window[PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST]).toBe(callWebViewHost);
+    expect(window[PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER]).toBe(webViewInjectionHandler);
     stopWebViewInjectionHandler();
-    expect(window[CEPC_KEY_CALL_WEB_VIEW_HOST]).toBeUndefined();
-    expect(window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]).toBeUndefined();
+    expect(window[PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST]).toBeUndefined();
+    expect(window[PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER]).toBeUndefined();
     vi.unstubAllGlobals();
   });
 
@@ -29,8 +32,8 @@ describe(`${startWebViewInjectionHandler.name} & ${stopWebViewInjectionHandler.n
     startWebViewInjectionHandler();
     stopWebViewInjectionHandler();
     expect(consoleWarnSpy).toBeCalledTimes(2);
-    expect(consoleWarnSpy).nthCalledWith(1, `[CEPC] \`window\`が存在しません。`);
-    expect(consoleWarnSpy).nthCalledWith(2, `[CEPC] \`window\`が存在しません。`);
+    expect(consoleWarnSpy).nthCalledWith(1, `[PROCEDURE_CALL] \`window\`が存在しません。`);
+    expect(consoleWarnSpy).nthCalledWith(2, `[PROCEDURE_CALL] \`window\`が存在しません。`);
   });
 });
 

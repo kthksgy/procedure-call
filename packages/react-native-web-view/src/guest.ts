@@ -6,7 +6,10 @@ import {
   handler,
 } from '@kthksgy/procedure-call';
 
-import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
+import {
+  PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST,
+  PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER,
+} from './common';
 
 import type { Jsonized, ProcedureCallOptions, ProcedureCallPacket } from '@kthksgy/procedure-call';
 
@@ -71,8 +74,8 @@ export async function webViewInjectionHandler(payloadString: string) {
 export function startWebViewInjectionHandler() {
   if (typeof window === 'object' && window !== null) {
     // `window`に公開する。
-    window[CEPC_KEY_CALL_WEB_VIEW_HOST] = callWebViewHost;
-    window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER] = webViewInjectionHandler;
+    window[PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST] = callWebViewHost;
+    window[PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER] = webViewInjectionHandler;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
@@ -84,8 +87,8 @@ export function startWebViewInjectionHandler() {
  */
 export function stopWebViewInjectionHandler() {
   if (typeof window === 'object' && window !== null) {
-    window[CEPC_KEY_CALL_WEB_VIEW_HOST] = undefined;
-    window[CEPC_KEY_WEB_VIEW_INJECTION_HANDLER] = undefined;
+    window[PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST] = undefined;
+    window[PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER] = undefined;
   } else {
     console.warn(`[${NAME}] \`window\`が存在しません。`);
   }
@@ -96,10 +99,10 @@ declare global {
     ReactNativeWebView?: {
       postMessage: { (message: string): void };
     };
-    [CEPC_KEY_CALL_WEB_VIEW_HOST]?: {
+    [PROCEDURE_CALL_KEY_CALL_WEB_VIEW_HOST]?: {
       (name: string, requestData: unknown, options?: ProcedureCallOptions): Promise<unknown>;
     };
-    [CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]?: { (payloadString: string): void };
+    [PROCEDURE_CALL_KEY_WEB_VIEW_INJECTION_HANDLER]?: { (payloadString: string): void };
   }
 
   let window: Window;
