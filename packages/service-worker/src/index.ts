@@ -1,6 +1,6 @@
-import { NAME, callTarget, handler } from 'cepc';
+import { NAME, callTarget, handler } from '@kthksgy/procedure-call';
 
-import type { CepcPacket } from 'cepc';
+import type { CepcPacket } from '@kthksgy/procedure-call';
 
 /** オリジン */
 const origins = new Set<string | RegExp>();

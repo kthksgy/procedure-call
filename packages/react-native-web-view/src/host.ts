@@ -7,11 +7,11 @@ import {
   handler,
   isDefaultProcedureRegistered,
   registerDefaultProcedure,
-} from 'cepc';
+} from '@kthksgy/procedure-call';
 
 import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
-import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from 'cepc';
+import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from '@kthksgy/procedure-call';
 
 /**
  * WebView Guestの手続きを呼び出す。
