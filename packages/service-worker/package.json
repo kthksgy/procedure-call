@@ -36,6 +36,9 @@
   "main": "./lib/index.umd.cjs",
   "module": "./lib/index.js",
   "name": "@kthksgy/procedure-call-service-worker",
+  "peerDependencies": {
+    "@kthksgy/procedure-call": "^0.0.0"
+  },
   "repository": {
     "directory": "packages/service-worker",
     "type": "git",
