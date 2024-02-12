@@ -1,6 +1,6 @@
 import {
   NAME,
-  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
+  PROCEDURE_CALL_ERROR_CODE,
   ProcedureCallError,
   call,
   generateTemplateLiteralString,
@@ -48,7 +48,7 @@ export async function callWebViewGuest<RequestData, ResponseData>(
     console.error(
       `[${NAME}] WebViewが初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE.UNINITIALIZED);
   }
 }
 

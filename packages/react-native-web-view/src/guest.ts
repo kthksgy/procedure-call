@@ -1,6 +1,6 @@
 import {
   NAME,
-  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
+  PROCEDURE_CALL_ERROR_CODE,
   ProcedureCallError,
   callTarget,
   handler,
@@ -32,7 +32,7 @@ export async function callWebViewHost<RequestData, ResponseData>(
       `[${NAME}] \`window.ReactNativeWebView.postMessage()\`が初期化されていないため、` +
         `手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE.UNINITIALIZED);
   }
 }
 
