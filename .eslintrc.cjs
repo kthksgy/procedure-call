@@ -18,8 +18,8 @@
 /*
 # 必須のパッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
 $ npm i -D \
-  '@typescript-eslint/eslint-plugin@~6.19.1' \
-  '@typescript-eslint/parser@~6.19.1' \
+  '@typescript-eslint/eslint-plugin@~6.21.0' \
+  '@typescript-eslint/parser@~6.21.0' \
   'confusing-browser-globals@~1.0.11' \
   'eslint@~8.56.0' \
   'eslint-config-prettier@~9.1.0' \
