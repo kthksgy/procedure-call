@@ -14,6 +14,7 @@
   "scripts": {
     "lint": "./lint.sh"
   },
+  "type": "module",
   "volta": {
     "node": "20.11.0",
     "npm": "10.4.0"

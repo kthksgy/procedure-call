@@ -13,8 +13,8 @@
   },
   "exports": {
     ".": {
-      "import": "./lib/index.mjs",
-      "require": "./lib/index.umd.js",
+      "import": "./lib/index.js",
+      "require": "./lib/index.umd.cjs",
       "types": "./lib/index.d.ts"
     }
   },
@@ -33,8 +33,8 @@
     "rpc"
   ],
   "license": "MIT",
-  "main": "./lib/index.umd.js",
-  "module": "./lib/index.mjs",
+  "main": "./lib/index.umd.cjs",
+  "module": "./lib/index.js",
   "name": "@kthksgy/procedure-call-service-worker",
   "repository": {
     "directory": "packages/service-worker",
@@ -47,6 +47,7 @@
     "coverage": "vitest run --coverage",
     "test": "vitest"
   },
+  "type": "module",
   "types": "./lib/index.d.ts",
   "version": "0.0.0"
 }
