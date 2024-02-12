@@ -12,7 +12,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "lint": "(cd packages/cepc && tsc --noEmit) && (cd packages/cepc-react-native-web-view && tsc --noEmit) && (cd packages/cepc-service-worker && tsc --noEmit) && eslint ."
+    "lint": "./lint.sh"
   },
   "volta": {
     "node": "20.11.0",
