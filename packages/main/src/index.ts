@@ -4,12 +4,12 @@ import { NAME } from './package';
 import { generateDuosexagesimalString, generateRandomString } from './utilities';
 
 import type {
-  CepcErrorOptions,
-  CepcPacket,
-  CepcProcedure,
-  CepcProcedureCallOptions,
-  CepcRawPacket,
   Jsonized,
+  Procedure,
+  ProcedureCallErrorOptions,
+  ProcedureCallOptions,
+  ProcedureCallPacket,
+  ProcedureCallRawPacket,
 } from './types';
 
 export * from './package';
@@ -17,32 +17,32 @@ export * from './utilities';
 
 export type * from './types';
 
-/** CEPCエラーコード: 内部エラー */
+/** エラーコード: 内部エラー */
 export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
-/** CEPCエラーコード: タイムアウト */
+/** エラーコード: タイムアウト */
 export const CEPC_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
-/** CEPCエラーコード: 未定義 */
+/** エラーコード: 未定義 */
 export const CEPC_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
-/** CEPCエラーコード: 未初期化 */
+/** エラーコード: 未初期化 */
 export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
-/** CEPC識別子 */
+/** プロシージャコール識別子 */
 const CEPC_IDENTIFIER = generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
-/** CEPCペイロード文字列接頭辞 */
+/** プロシージャコールペイロード文字列接頭辞 */
 export const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
-/** CEPCプロトコル */
+/** プロシージャコールプロトコル */
 export const CEPC_PROTOCOL = 'cepc';
 
 /** コールバック */
 const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): void }]>();
 /** 既定の手続き */
-const defaultProcedures = new Map<string, CepcProcedure>();
+const defaultProcedures = new Map<string, Procedure>();
 /** カウンター */
 let n = 0;
 /** 手続き */
-const procedures = new Map<string, CepcProcedure>();
+const procedures = new Map<string, Procedure>();
 
 /**
- * CEPCエラー
+ * プロシージャコールエラー
  */
 export class CepcError<Data = unknown> extends Error {
   /**
@@ -60,7 +60,7 @@ export class CepcError<Data = unknown> extends Error {
    */
   timestamp: number;
 
-  constructor(code?: string, message?: string, options?: CepcErrorOptions<Data>) {
+  constructor(code?: string, message?: string, options?: ProcedureCallErrorOptions<Data>) {
     super(message, options && options.cause ? { cause: options.cause } : undefined);
 
     this.code = code ?? '';
@@ -87,13 +87,13 @@ export async function call<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
   post: { (payloadString: string): void | PromiseLike<void> },
-  options?: CepcProcedureCallOptions,
+  options?: ProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   /** キー */
   const key = CEPC_IDENTIFIER + ':' + String(n++);
 
   /** リクエスト */
-  const request: CepcRawPacket<'req'> = {
+  const request: ProcedureCallRawPacket<'req'> = {
     data: requestData,
     index: 0,
     key,
@@ -133,7 +133,7 @@ export async function callTarget<RequestData, ResponseData>(
   target: { postMessage: { (message: string): void } } | null | undefined,
   name: string,
   requestData: RequestData,
-  options?: CepcProcedureCallOptions,
+  options?: ProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   if (
     typeof target === 'object' &&
@@ -158,7 +158,7 @@ export async function callTarget<RequestData, ResponseData>(
  */
 export async function handler(
   payloadString: string,
-  post: { (payloadString: string, payload: CepcPacket<'req'>): void | PromiseLike<void> },
+  post: { (payloadString: string, payload: ProcedureCallPacket<'req'>): void | PromiseLike<void> },
   assist?: { (payloadString: string): void | PromiseLike<void> },
 ) {
   /** ペイロード */
@@ -170,7 +170,7 @@ export async function handler(
         const procedure = procedures.get(payload.name);
         if (procedure) {
           await Promise.resolve(procedure(payload.data, { payload }))
-            .then(function (responseData): CepcPacket<'res'> {
+            .then(function (responseData): ProcedureCallPacket<'res'> {
               return {
                 data: responseData,
                 index: payload.index + 1,
@@ -182,7 +182,7 @@ export async function handler(
                 v: 0,
               };
             })
-            .catch(function (error): CepcPacket<'err'> {
+            .catch(function (error): ProcedureCallPacket<'err'> {
               if (error instanceof CepcError) {
                 console.debug(error);
                 return {
@@ -228,7 +228,7 @@ export async function handler(
                   timestamp: Date.now(),
                   t: 'err',
                   v: 0,
-                } satisfies CepcPacket<'err'>),
+                } satisfies ProcedureCallPacket<'err'>),
               payload,
             ),
           );
@@ -326,7 +326,11 @@ export function isProcedureRegistered(name?: string, procedure?: any) {
  */
 function parsePayloadString(
   payloadString: string,
-): CepcPacket<'err'> | CepcPacket<'req'> | CepcPacket<'res'> | undefined {
+):
+  | ProcedureCallPacket<'err'>
+  | ProcedureCallPacket<'req'>
+  | ProcedureCallPacket<'res'>
+  | undefined {
   if (typeof payloadString === 'string' && payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
     try {
       /** ペイロード */
@@ -357,7 +361,7 @@ function parsePayloadString(
  */
 export function registerDefaultProcedure<RequestData, ResponseData>(
   name: string,
-  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: Procedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
 ) {
   if (!procedures.has(name) || procedures.get(name) === defaultProcedures.get(name)) {
     procedures.set(name, procedure);
@@ -381,7 +385,7 @@ export function registerDefaultProcedure<RequestData, ResponseData>(
  */
 export function registerProcedure<RequestData, ResponseData>(
   name: string,
-  procedure: CepcProcedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
+  procedure: Procedure<Jsonized<RequestData, object>, Awaited<ResponseData>>,
 ) {
   procedures.set(name, procedure);
   return function () {

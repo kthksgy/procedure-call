@@ -8,90 +8,86 @@ export type Jsonized<Type, Parent extends object | Array<any> | undefined> = Typ
   ? Parent extends object
     ? never
     : Parent extends Array<any>
-    ? null
-    : void
+      ? null
+      : void
   : Type extends bigint
-  ? never
-  : Type extends readonly [...infer Tuple]
-  ? [
-      ...{
-        [Index in keyof Tuple]: Index extends Exclude<keyof Tuple, keyof Array<any>>
-          ? Jsonized<Tuple[Index], Array<any>>
-          : Tuple[Index];
-      },
-    ]
-  : Type extends Array<infer Element>
-  ? Array<Jsonized<Element, Array<any>>>
-  : Type extends Date
-  ? string
-  : Type extends object
-  ? NeverOmitted<{ [Key in keyof Type]: Jsonized<Type[Key], object> }>
-  : Type extends number
-  ? number // | null // `NaN`、`Infinity`、`-Infinity`は`null`になる。
-  : Type;
+    ? never
+    : Type extends readonly [...infer Tuple]
+      ? [
+          ...{
+            [Index in keyof Tuple]: Index extends Exclude<keyof Tuple, keyof Array<any>>
+              ? Jsonized<Tuple[Index], Array<any>>
+              : Tuple[Index];
+          },
+        ]
+      : Type extends Array<infer Element>
+        ? Array<Jsonized<Element, Array<any>>>
+        : Type extends Date
+          ? string
+          : Type extends object
+            ? NeverOmitted<{ [Key in keyof Type]: Jsonized<Type[Key], object> }>
+            : Type extends number
+              ? number // | null // `NaN`、`Infinity`、`-Infinity`は`null`になる。
+              : Type;
 
 /**
- * CEPCコンテキスト
+ * プロシージャコールコンテキスト
  */
-export type CepcContext<Data = unknown, Context extends object = object> = {
+export type ProcedureCallContext<Data = unknown, Context extends object = object> = {
   /** ペイロード */
-  payload: CepcPacket<'req', CepcVersionUnion, Data>;
+  payload: ProcedureCallPacket<'req', ProcedureCallVersionUnion, Data>;
 } & Partial<Context>;
 
 /**
- * CEPCエラーオプション
+ * プロシージャコールエラーオプション
  */
-export interface CepcErrorOptions<Data = unknown> extends ErrorOptions {
+export interface ProcedureCallErrorOptions<Data = unknown> extends ErrorOptions {
   /** データ */
   data?: Data;
 }
 
 /**
- * CEPCパケット
+ * プロシージャコールパケット
  */
-export type CepcPacket<
+export type ProcedureCallPacket<
   Type extends 'err' | 'req' | 'res',
-  Version extends CepcVersionUnion = 0,
+  Version extends ProcedureCallVersionUnion = 0,
   Data = unknown,
-> = CepcRawPacket<Type, Version, Jsonized<Data, object>>;
+> = ProcedureCallRawPacket<Type, Version, Jsonized<Data, object>>;
 
 /**
- * CEPC手続き
+ * プロシージャ
  */
-export type CepcProcedure<
-  RequestData = any,
-  ResponseData = any,
-  Context extends object = object,
-> = {
+export type Procedure<RequestData = any, ResponseData = any, Context extends object = object> = {
   /**
    * @param requestData リクエストデータ
    * @param context コンテキスト
    * @returns レスポンスデータ
-   * @throws {CepcError} エラー
+   * @throws {ProcedureCallError} エラー
    */
   (
     requestData: RequestData,
-    context: CepcContext<RequestData, Context>,
+    context: ProcedureCallContext<RequestData, Context>,
   ): ResponseData | Promise<ResponseData>;
 };
 
 /**
- * CEPC手続き呼び出しオプション
+ * プロシージャコールオプション
  */
-export type CepcProcedureCallOptions = {
+export type ProcedureCallOptions = {
   /** タイムアウト時間[ミリ秒] */
   timeout?: number;
 };
 
-/** CEPCプロトコル */
-export type CepcProtocol = 'cepc';
+/** プロシージャコールプロトコル */
+export type ProcedureCallProtocol = 'cepc';
 
 /**
- * CEPCローパケット
+ * プロシージャコールローパケット
  */
-export type CepcRawPacket<
+export type ProcedureCallRawPacket<
   Type extends 'err' | 'req' | 'res',
-  Version extends CepcVersionUnion = 0,
+  Version extends ProcedureCallVersionUnion = 0,
   Data = unknown,
 > = {
   /**
@@ -104,7 +100,7 @@ export type CepcRawPacket<
   /** 手続きの名前 */
   name: string;
   /** プロトコル */
-  p: CepcProtocol;
+  p: ProcedureCallProtocol;
   /** タイムスタンプ(UNIX時間)[ミリ秒] */
   timestamp: number;
   /** タイプ */
@@ -114,13 +110,13 @@ export type CepcRawPacket<
 } & (Type extends 'err'
   ? { code: string; data?: Data; message?: string }
   : Type extends 'req'
-  ? { data: Data }
-  : Type extends 'res'
-  ? { data: Data }
-  : unknown);
+    ? { data: Data }
+    : Type extends 'res'
+      ? { data: Data }
+      : unknown);
 
-/** CEPCバージョンユニオン */
-export type CepcVersionUnion = 0;
+/** プロシージャコールバージョンユニオン */
+export type ProcedureCallVersionUnion = 0;
 
 /**
  * バリューが`never`のキーが省略された
