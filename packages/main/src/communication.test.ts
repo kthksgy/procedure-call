@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { CepcError, call, callTarget, handler, registerProcedure, reset } from './index';
+import { ProcedureCallError, call, callTarget, handler, registerProcedure, reset } from './index';
 
 /**
  * 送信関数
@@ -70,7 +70,7 @@ describe(`${callTarget.name}`, function () {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
     await callTarget(target, 'ping', undefined).catch(function (error) {
-      expect(error).toBeInstanceOf(CepcError);
+      expect(error).toBeInstanceOf(ProcedureCallError);
       expect(error.code).toBe('CEPC_UNINITIALIZED');
     });
 
@@ -92,12 +92,12 @@ test('タイムアウト', async function () {
   });
 
   await call('10seconds', undefined, post, { timeout: 100 }).catch(function (error) {
-    expect(error).toBeInstanceOf(CepcError);
+    expect(error).toBeInstanceOf(ProcedureCallError);
     expect(error.code).toBe('CEPC_TIMEOUT');
   });
 });
 
-test(`${CepcError.name}をそのまま返信する`, async function () {
+test(`${ProcedureCallError.name}をそのまま返信する`, async function () {
   expect.assertions(6);
 
   /** `console.debug` */
@@ -106,11 +106,11 @@ test(`${CepcError.name}をそのまま返信する`, async function () {
   registerProcedure('throw', async function () {
     /** 原因 */
     const cause = new Error();
-    throw new CepcError('1234', 'Visible Message', { cause, data: { a: 1 } });
+    throw new ProcedureCallError('1234', 'Visible Message', { cause, data: { a: 1 } });
   });
 
   await call('throw', undefined, post).catch(function (error) {
-    expect(error).toBeInstanceOf(CepcError);
+    expect(error).toBeInstanceOf(ProcedureCallError);
     expect(error.cause).toBe(undefined);
     expect(error.code).toBe('1234');
     expect(error.data).toStrictEqual({ a: 1 });
@@ -122,18 +122,18 @@ test(`${CepcError.name}をそのまま返信する`, async function () {
   consoleDebugSpy.mockRestore();
 });
 
-test(`${CepcError.name}のエラーコードが空の場合に上書きする`, async function () {
+test(`${ProcedureCallError.name}のエラーコードが空の場合に上書きする`, async function () {
   expect.assertions(3);
 
   /** `console.debug` */
   const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(function () {});
 
   registerProcedure('throw', async function () {
-    throw new CepcError();
+    throw new ProcedureCallError();
   });
 
   await call('throw', undefined, post).catch(function (error) {
-    expect(error).toBeInstanceOf(CepcError);
+    expect(error).toBeInstanceOf(ProcedureCallError);
     expect(error.code).toBe('CEPC_INTERNAL');
   });
 
@@ -142,7 +142,7 @@ test(`${CepcError.name}のエラーコードが空の場合に上書きする`, 
   consoleDebugSpy.mockRestore();
 });
 
-describe(`${CepcError.name}以外のエラーを変換する`, function () {
+describe(`${ProcedureCallError.name}以外のエラーを変換する`, function () {
   /** カスタムエラー */
   class CustomError extends Error {}
 
@@ -166,7 +166,7 @@ describe(`${CepcError.name}以外のエラーを変換する`, function () {
     });
 
     await call('throw', undefined, post).catch(function (error) {
-      expect(error).toBeInstanceOf(CepcError);
+      expect(error).toBeInstanceOf(ProcedureCallError);
       expect(error.code).toBe('CEPC_INTERNAL');
       expect(error.message).toBe('');
     });

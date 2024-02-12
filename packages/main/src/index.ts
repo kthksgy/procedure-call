@@ -18,19 +18,20 @@ export * from './utilities';
 export type * from './types';
 
 /** エラーコード: 内部エラー */
-export const CEPC_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
+export const PROCEDURE_CALL_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
 /** エラーコード: タイムアウト */
-export const CEPC_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
+export const PROCEDURE_CALL_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
 /** エラーコード: 未定義 */
-export const CEPC_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
+export const PROCEDURE_CALL_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
 /** エラーコード: 未初期化 */
-export const CEPC_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
+export const PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
 /** プロシージャコール識別子 */
-const CEPC_IDENTIFIER = generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
+const PROCEDURE_CALL_IDENTIFIER =
+  generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
 /** プロシージャコールペイロード文字列接頭辞 */
-export const CEPC_PAYLOAD_STRING_PREFIX = 'cepc::';
+export const PROCEDURE_CALL_PAYLOAD_STRING_PREFIX = 'cepc::';
 /** プロシージャコールプロトコル */
-export const CEPC_PROTOCOL = 'cepc';
+export const PROCEDURE_CALL_PROTOCOL = 'cepc';
 
 /** コールバック */
 const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): void }]>();
@@ -44,7 +45,7 @@ const procedures = new Map<string, Procedure>();
 /**
  * プロシージャコールエラー
  */
-export class CepcError<Data = unknown> extends Error {
+export class ProcedureCallError<Data = unknown> extends Error {
   /**
    * コード
    * @default ''
@@ -64,7 +65,7 @@ export class CepcError<Data = unknown> extends Error {
     super(message, options && options.cause ? { cause: options.cause } : undefined);
 
     this.code = code ?? '';
-    this.name = CepcError.name + '[' + this.code + ']';
+    this.name = ProcedureCallError.name + '[' + this.code + ']';
     this.timestamp = Date.now();
 
     if (options) {
@@ -90,7 +91,7 @@ export async function call<RequestData, ResponseData>(
   options?: ProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   /** キー */
-  const key = CEPC_IDENTIFIER + ':' + String(n++);
+  const key = PROCEDURE_CALL_IDENTIFIER + ':' + String(n++);
 
   /** リクエスト */
   const request: ProcedureCallRawPacket<'req'> = {
@@ -98,7 +99,7 @@ export async function call<RequestData, ResponseData>(
     index: 0,
     key,
     name,
-    p: CEPC_PROTOCOL,
+    p: PROCEDURE_CALL_PROTOCOL,
     timestamp: Date.now(),
     t: 'req',
     v: 0,
@@ -110,13 +111,13 @@ export async function call<RequestData, ResponseData>(
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
       setTimeout(function () {
-        reject(new CepcError(CEPC_ERROR_CODE_TIMEOUT));
+        reject(new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_TIMEOUT));
         callbacks.delete(key);
       }, options.timeout);
     }
   });
 
-  await Promise.resolve(post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(request)));
+  await Promise.resolve(post(PROCEDURE_CALL_PAYLOAD_STRING_PREFIX + JSON.stringify(request)));
 
   return promise;
 }
@@ -146,7 +147,7 @@ export async function callTarget<RequestData, ResponseData>(
     console.error(
       `[${NAME}] \`target.postMessage\`が初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new CepcError(CEPC_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
   }
 }
 
@@ -176,23 +177,23 @@ export async function handler(
                 index: payload.index + 1,
                 key: payload.key,
                 name: payload.name,
-                p: CEPC_PROTOCOL,
+                p: PROCEDURE_CALL_PROTOCOL,
                 timestamp: Date.now(),
                 t: 'res',
                 v: 0,
               };
             })
             .catch(function (error): ProcedureCallPacket<'err'> {
-              if (error instanceof CepcError) {
+              if (error instanceof ProcedureCallError) {
                 console.debug(error);
                 return {
-                  code: error.code || CEPC_ERROR_CODE_INTERNAL,
+                  code: error.code || PROCEDURE_CALL_ERROR_CODE_INTERNAL,
                   ...(error.data !== undefined && { data: error.data }),
                   index: payload.index + 1,
                   key: payload.key,
                   ...(error.message && { message: error.message }),
                   name: payload.name,
-                  p: CEPC_PROTOCOL,
+                  p: PROCEDURE_CALL_PROTOCOL,
                   timestamp: error.timestamp,
                   t: 'err',
                   v: 0,
@@ -200,11 +201,11 @@ export async function handler(
               } else {
                 console.error(error);
                 return {
-                  code: CEPC_ERROR_CODE_INTERNAL,
+                  code: PROCEDURE_CALL_ERROR_CODE_INTERNAL,
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,
-                  p: CEPC_PROTOCOL,
+                  p: PROCEDURE_CALL_PROTOCOL,
                   timestamp: Date.now(),
                   t: 'err',
                   v: 0,
@@ -212,19 +213,19 @@ export async function handler(
               }
             })
             .then(function (response) {
-              return post(CEPC_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
+              return post(PROCEDURE_CALL_PAYLOAD_STRING_PREFIX + JSON.stringify(response), payload);
             });
         } else {
           console.error(`[${NAME}] 手続き\`${payload.name}\`が登録されていません。`);
           await Promise.resolve(
             post(
-              CEPC_PAYLOAD_STRING_PREFIX +
+              PROCEDURE_CALL_PAYLOAD_STRING_PREFIX +
                 JSON.stringify({
-                  code: CEPC_ERROR_CODE_UNDEFINED,
+                  code: PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,
-                  p: CEPC_PROTOCOL,
+                  p: PROCEDURE_CALL_PROTOCOL,
                   timestamp: Date.now(),
                   t: 'err',
                   v: 0,
@@ -252,7 +253,9 @@ export async function handler(
         /** コールバック */
         const callback = callbacks.get(payload.key);
         if (callback) {
-          callback[1](new CepcError(payload.code, payload.message, { data: payload.data }));
+          callback[1](
+            new ProcedureCallError(payload.code, payload.message, { data: payload.data }),
+          );
           callbacks.delete(payload.key);
         } else {
           console.error(
@@ -331,14 +334,17 @@ function parsePayloadString(
   | ProcedureCallPacket<'req'>
   | ProcedureCallPacket<'res'>
   | undefined {
-  if (typeof payloadString === 'string' && payloadString.startsWith(CEPC_PAYLOAD_STRING_PREFIX)) {
+  if (
+    typeof payloadString === 'string' &&
+    payloadString.startsWith(PROCEDURE_CALL_PAYLOAD_STRING_PREFIX)
+  ) {
     try {
       /** ペイロード */
-      const payload = JSON.parse(payloadString.slice(CEPC_PAYLOAD_STRING_PREFIX.length));
+      const payload = JSON.parse(payloadString.slice(PROCEDURE_CALL_PAYLOAD_STRING_PREFIX.length));
       if (
         typeof payload === 'object' &&
         payload !== null &&
-        payload.p === CEPC_PROTOCOL &&
+        payload.p === PROCEDURE_CALL_PROTOCOL &&
         payload.v === 0
       ) {
         return payload;
@@ -412,8 +418,8 @@ export function reset() {
 }
 
 if (import.meta.vitest) {
-  test(`識別子"${CEPC_IDENTIFIER}"の形式`, function () {
-    expect(CEPC_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
+  test(`識別子"${PROCEDURE_CALL_IDENTIFIER}"の形式`, function () {
+    expect(PROCEDURE_CALL_IDENTIFIER).toMatch(/^[0-9A-Za-z]+:[0-9A-Za-z]{4}$/);
   });
 
   test(`${call.name}: \`n\`の増加`, async function () {

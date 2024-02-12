@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import {
-  CEPC_ERROR_CODE_INTERNAL,
-  CEPC_ERROR_CODE_TIMEOUT,
-  CEPC_ERROR_CODE_UNDEFINED,
-  CEPC_ERROR_CODE_UNINITIALIZED,
-  CEPC_PAYLOAD_STRING_PREFIX,
-  CEPC_PROTOCOL,
-  CepcError,
+  PROCEDURE_CALL_ERROR_CODE_INTERNAL,
+  PROCEDURE_CALL_ERROR_CODE_TIMEOUT,
+  PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
+  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
+  PROCEDURE_CALL_PAYLOAD_STRING_PREFIX,
+  PROCEDURE_CALL_PROTOCOL,
+  ProcedureCallError,
   NAME,
   VERSION,
   isDefaultProcedureRegistered,
@@ -19,12 +19,12 @@ import {
 
 describe('定数定義', function () {
   test.each([
-    [CEPC_ERROR_CODE_INTERNAL, 'CEPC_INTERNAL'],
-    [CEPC_ERROR_CODE_TIMEOUT, 'CEPC_TIMEOUT'],
-    [CEPC_ERROR_CODE_UNDEFINED, 'CEPC_UNDEFINED'],
-    [CEPC_ERROR_CODE_UNINITIALIZED, 'CEPC_UNINITIALIZED'],
-    [CEPC_PAYLOAD_STRING_PREFIX, 'cepc::'],
-    [CEPC_PROTOCOL, 'cepc'],
+    [PROCEDURE_CALL_ERROR_CODE_INTERNAL, 'CEPC_INTERNAL'],
+    [PROCEDURE_CALL_ERROR_CODE_TIMEOUT, 'CEPC_TIMEOUT'],
+    [PROCEDURE_CALL_ERROR_CODE_UNDEFINED, 'CEPC_UNDEFINED'],
+    [PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED, 'CEPC_UNINITIALIZED'],
+    [PROCEDURE_CALL_PAYLOAD_STRING_PREFIX, 'cepc::'],
+    [PROCEDURE_CALL_PROTOCOL, 'cepc'],
     [NAME, 'CEPC'],
     [VERSION, __version],
   ])('"%s" = "%s"', function (actualValue, expectedValue) {
@@ -32,12 +32,12 @@ describe('定数定義', function () {
   });
 });
 
-describe(`${CepcError.name}`, function () {
+describe(`${ProcedureCallError.name}`, function () {
   test('インスタンス化', function () {
     /** エラー */
-    const error = new CepcError();
+    const error = new ProcedureCallError();
 
-    expect(error).toBeInstanceOf(CepcError);
+    expect(error).toBeInstanceOf(ProcedureCallError);
     expect(error.cause).toBe(undefined);
     expect(error.code).toBe('');
     expect(error.data).toBe(undefined);
@@ -48,9 +48,9 @@ describe(`${CepcError.name}`, function () {
     /** 原因 */
     const cause = new Error();
     /** エラー */
-    const error = new CepcError('abc', 'メッセージです。', { cause, data: { a: 1 } });
+    const error = new ProcedureCallError('abc', 'メッセージです。', { cause, data: { a: 1 } });
 
-    expect(error).toBeInstanceOf(CepcError);
+    expect(error).toBeInstanceOf(ProcedureCallError);
     expect(error.cause).toBe(cause);
     expect(error.code).toBe('abc');
     expect(error.data).toStrictEqual({ a: 1 });
