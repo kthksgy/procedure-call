@@ -18,20 +18,20 @@ export * from './utilities';
 export type * from './types';
 
 /** エラーコード: 内部エラー */
-export const PROCEDURE_CALL_ERROR_CODE_INTERNAL = 'CEPC_INTERNAL';
+export const PROCEDURE_CALL_ERROR_CODE_INTERNAL = 'PROCEDURE_CALL_INTERNAL';
 /** エラーコード: タイムアウト */
-export const PROCEDURE_CALL_ERROR_CODE_TIMEOUT = 'CEPC_TIMEOUT';
+export const PROCEDURE_CALL_ERROR_CODE_TIMEOUT = 'PROCEDURE_CALL_TIMEOUT';
 /** エラーコード: 未定義 */
-export const PROCEDURE_CALL_ERROR_CODE_UNDEFINED = 'CEPC_UNDEFINED';
+export const PROCEDURE_CALL_ERROR_CODE_UNDEFINED = 'PROCEDURE_CALL_UNDEFINED';
 /** エラーコード: 未初期化 */
-export const PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED = 'CEPC_UNINITIALIZED';
+export const PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED = 'PROCEDURE_CALL_UNINITIALIZED';
 /** プロシージャコール識別子 */
 const PROCEDURE_CALL_IDENTIFIER =
   generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
 /** プロシージャコールペイロード文字列接頭辞 */
-export const PROCEDURE_CALL_PAYLOAD_STRING_PREFIX = 'cepc::';
+export const PROCEDURE_CALL_PAYLOAD_STRING_PREFIX = 'pc::';
 /** プロシージャコールプロトコル */
-export const PROCEDURE_CALL_PROTOCOL = 'cepc';
+export const PROCEDURE_CALL_PROTOCOL = 'pc';
 
 /** コールバック */
 const callbacks = new Map<string, [{ (value: any): void }, { (reason?: any): void }]>();
@@ -442,13 +442,13 @@ if (import.meta.vitest) {
 
   describe(`${parsePayloadString.name}`, function () {
     test.each([
-      'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
-      'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
+      'pc::{"index":1,"key":"KEY","name":"NAME","p":"pc","timestamp":0,"t":"res","v":0}',
+      'pc::{"code":"PROCEDURE_CALL_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"pc","timestamp":0,"t":"err","v":0}',
     ])(`Truthy %#`, function (payloadString) {
       expect(parsePayloadString(payloadString)).toBeTruthy();
     });
 
-    test.each(['', 'abc', 'cepc::', 'cepc::abc', 'cepc::{}'])(`Falsy %#`, function (payloadString) {
+    test.each(['', 'abc', 'pc::', 'pc::abc', 'pc::{}'])(`Falsy %#`, function (payloadString) {
       expect(parsePayloadString(payloadString)).toBeFalsy();
     });
   });

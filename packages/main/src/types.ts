@@ -80,7 +80,7 @@ export type ProcedureCallOptions = {
 };
 
 /** プロシージャコールプロトコル */
-export type ProcedureCallProtocol = 'cepc';
+export type ProcedureCallProtocol = 'pc';
 
 /**
  * プロシージャコールローパケット

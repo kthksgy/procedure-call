@@ -71,11 +71,11 @@ describe(`${callTarget.name}`, function () {
 
     await callTarget(target, 'ping', undefined).catch(function (error) {
       expect(error).toBeInstanceOf(ProcedureCallError);
-      expect(error.code).toBe('CEPC_UNINITIALIZED');
+      expect(error.code).toBe('PROCEDURE_CALL_UNINITIALIZED');
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[CEPC] `target.postMessage`が初期化されていないため、手続き`ping`のリクエストを送信できません。',
+      '[PROCEDURE_CALL] `target.postMessage`が初期化されていないため、手続き`ping`のリクエストを送信できません。',
     );
 
     consoleErrorSpy.mockRestore();
@@ -93,7 +93,7 @@ test('タイムアウト', async function () {
 
   await call('10seconds', undefined, post, { timeout: 100 }).catch(function (error) {
     expect(error).toBeInstanceOf(ProcedureCallError);
-    expect(error.code).toBe('CEPC_TIMEOUT');
+    expect(error.code).toBe('PROCEDURE_CALL_TIMEOUT');
   });
 });
 
@@ -134,7 +134,7 @@ test(`${ProcedureCallError.name}のエラーコードが空の場合に上書き
 
   await call('throw', undefined, post).catch(function (error) {
     expect(error).toBeInstanceOf(ProcedureCallError);
-    expect(error.code).toBe('CEPC_INTERNAL');
+    expect(error.code).toBe('PROCEDURE_CALL_INTERNAL');
   });
 
   expect(consoleDebugSpy).toHaveBeenCalledOnce();
@@ -167,7 +167,7 @@ describe(`${ProcedureCallError.name}以外のエラーを変換する`, function
 
     await call('throw', undefined, post).catch(function (error) {
       expect(error).toBeInstanceOf(ProcedureCallError);
-      expect(error.code).toBe('CEPC_INTERNAL');
+      expect(error.code).toBe('PROCEDURE_CALL_INTERNAL');
       expect(error.message).toBe('');
     });
 
@@ -202,13 +202,13 @@ test('手続きが登録されていない', async function () {
   await call('unknownProcedure', undefined, post).catch(function (error) {
     expect(error).toEqual(
       expect.objectContaining({
-        code: 'CEPC_UNDEFINED',
+        code: 'PROCEDURE_CALL_UNDEFINED',
       }),
     );
   });
 
   expect(consoleErrorSpy).toHaveBeenCalledWith(
-    '[CEPC] 手続き`unknownProcedure`が登録されていません。',
+    '[PROCEDURE_CALL] 手続き`unknownProcedure`が登録されていません。',
   );
 
   consoleErrorSpy.mockRestore();
@@ -221,7 +221,9 @@ test('無効なペイロード文字列を受信した', async function () {
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
   await handler('', function () {});
-  expect(consoleErrorSpy).toHaveBeenCalledWith('[CEPC] ペイロード文字列``が無効な形式です。');
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    '[PROCEDURE_CALL] ペイロード文字列``が無効な形式です。',
+  );
 
   consoleErrorSpy.mockRestore();
 });
@@ -233,11 +235,11 @@ test('コールバックが存在しない場合のレスポンス受信', async
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
   await handler(
-    'cepc::{"index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"res","v":0}',
+    'pc::{"index":1,"key":"KEY","name":"NAME","p":"pc","timestamp":0,"t":"res","v":0}',
     function () {},
   );
   expect(consoleErrorSpy).toHaveBeenCalledWith(
-    '[CEPC] リクエスト`NAME:KEY`のコールバックが存在しないため、レスポンスを受信できません。',
+    '[PROCEDURE_CALL] リクエスト`NAME:KEY`のコールバックが存在しないため、レスポンスを受信できません。',
   );
 
   consoleErrorSpy.mockRestore();
@@ -250,11 +252,11 @@ test('コールバックが存在しない場合のエラー受信', async funct
   const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(function () {});
 
   await handler(
-    'cepc::{"code":"CEPC_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"cepc","timestamp":0,"t":"err","v":0}',
+    'pc::{"code":"PROCEDURE_CALL_INTERNAL","index":1,"key":"KEY","name":"NAME","p":"pc","timestamp":0,"t":"err","v":0}',
     function () {},
   );
   expect(consoleErrorSpy).toHaveBeenCalledWith(
-    '[CEPC] リクエスト`NAME:KEY`のコールバックが存在しないため、エラーを受信できません。',
+    '[PROCEDURE_CALL] リクエスト`NAME:KEY`のコールバックが存在しないため、エラーを受信できません。',
   );
 
   consoleErrorSpy.mockRestore();

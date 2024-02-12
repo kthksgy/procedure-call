@@ -1,4 +1,4 @@
 /** 名前 */
-export const NAME = 'CEPC';
+export const NAME = 'PROCEDURE_CALL';
 /** バージョン */
 export const VERSION = __version;
