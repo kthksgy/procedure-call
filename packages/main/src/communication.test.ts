@@ -1,6 +1,4 @@
-import { afterEach } from 'node:test';
-
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { CepcError, call, callTarget, handler, registerProcedure, reset } from './index';
 
