@@ -1,25 +1,17 @@
 import { describe, expect, test, vi } from 'vitest';
 
+import { PROCEDURE_CALL_ERROR_CODE, ProcedureCallError } from './error';
 import { NAME } from './package';
 import { generateDuosexagesimalString, generateRandomString } from './utilities';
 
 import type {
   Jsonized,
   Procedure,
-  ProcedureCallErrorOptions,
   ProcedureCallOptions,
   ProcedureCallPacket,
   ProcedureCallRawPacket,
 } from './types';
 
-/** エラーコード: 内部エラー */
-export const PROCEDURE_CALL_ERROR_CODE_INTERNAL = 'PROCEDURE_CALL_INTERNAL';
-/** エラーコード: タイムアウト */
-export const PROCEDURE_CALL_ERROR_CODE_TIMEOUT = 'PROCEDURE_CALL_TIMEOUT';
-/** エラーコード: 未定義 */
-export const PROCEDURE_CALL_ERROR_CODE_UNDEFINED = 'PROCEDURE_CALL_UNDEFINED';
-/** エラーコード: 未初期化 */
-export const PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED = 'PROCEDURE_CALL_UNINITIALIZED';
 /** プロシージャコール識別子 */
 const PROCEDURE_CALL_IDENTIFIER =
   generateDuosexagesimalString(Date.now()) + ':' + generateRandomString(4);
@@ -36,40 +28,6 @@ const defaultProcedures = new Map<string, Procedure>();
 let n = 0;
 /** 手続き */
 const procedures = new Map<string, Procedure>();
-
-/**
- * プロシージャコールエラー
- */
-export class ProcedureCallError<Data = unknown> extends Error {
-  /**
-   * コード
-   * @default ''
-   */
-  code: string;
-  /**
-   * データ
-   * @default undefined
-   */
-  data?: Data;
-  /**
-   * タイムスタンプ(UNIX時間)[ミリ秒]
-   */
-  timestamp: number;
-
-  constructor(code?: string, message?: string, options?: ProcedureCallErrorOptions<Data>) {
-    super(message, options && options.cause ? { cause: options.cause } : undefined);
-
-    this.code = code ?? '';
-    this.name = ProcedureCallError.name + '[' + this.code + ']';
-    this.timestamp = Date.now();
-
-    if (options) {
-      if (options.data) {
-        this.data = options.data;
-      }
-    }
-  }
-}
 
 /**
  * 手続きを呼び出す。
@@ -106,7 +64,7 @@ export async function call<RequestData, ResponseData>(
 
     if (options?.timeout !== undefined && Number.isFinite(options.timeout) && options.timeout > 0) {
       setTimeout(function () {
-        reject(new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_TIMEOUT));
+        reject(new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE.TIMEOUT));
         callbacks.delete(key);
       }, options.timeout);
     }
@@ -142,7 +100,7 @@ export async function callTarget<RequestData, ResponseData>(
     console.error(
       `[${NAME}] \`target.postMessage\`が初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE.UNINITIALIZED);
   }
 }
 
@@ -182,7 +140,7 @@ export async function handler(
               if (error instanceof ProcedureCallError) {
                 console.debug(error);
                 return {
-                  code: error.code || PROCEDURE_CALL_ERROR_CODE_INTERNAL,
+                  code: error.code || PROCEDURE_CALL_ERROR_CODE.INTERNAL,
                   ...(error.data !== undefined && { data: error.data }),
                   index: payload.index + 1,
                   key: payload.key,
@@ -196,7 +154,7 @@ export async function handler(
               } else {
                 console.error(error);
                 return {
-                  code: PROCEDURE_CALL_ERROR_CODE_INTERNAL,
+                  code: PROCEDURE_CALL_ERROR_CODE.INTERNAL,
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,
@@ -216,7 +174,7 @@ export async function handler(
             post(
               PROCEDURE_CALL_PAYLOAD_STRING_PREFIX +
                 JSON.stringify({
-                  code: PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
+                  code: PROCEDURE_CALL_ERROR_CODE.UNDEFINED,
                   index: payload.index + 1,
                   key: payload.key,
                   name: payload.name,

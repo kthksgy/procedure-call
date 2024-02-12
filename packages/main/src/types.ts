@@ -39,14 +39,6 @@ export type ProcedureCallContext<Data = unknown, Context extends object = object
 } & Partial<Context>;
 
 /**
- * プロシージャコールエラーオプション
- */
-export interface ProcedureCallErrorOptions<Data = unknown> extends ErrorOptions {
-  /** データ */
-  data?: Data;
-}
-
-/**
  * プロシージャコールパケット
  */
 export type ProcedureCallPacket<

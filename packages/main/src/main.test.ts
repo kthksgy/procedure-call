@@ -1,13 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import {
-  PROCEDURE_CALL_ERROR_CODE_INTERNAL,
-  PROCEDURE_CALL_ERROR_CODE_TIMEOUT,
-  PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
-  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
   PROCEDURE_CALL_PAYLOAD_STRING_PREFIX,
   PROCEDURE_CALL_PROTOCOL,
-  ProcedureCallError,
   isDefaultProcedureRegistered,
   isProcedureRegistered,
   registerDefaultProcedure,
@@ -18,42 +13,12 @@ import { NAME, VERSION } from './package';
 
 describe('定数定義', function () {
   test.each([
-    [PROCEDURE_CALL_ERROR_CODE_INTERNAL, 'PROCEDURE_CALL_INTERNAL'],
-    [PROCEDURE_CALL_ERROR_CODE_TIMEOUT, 'PROCEDURE_CALL_TIMEOUT'],
-    [PROCEDURE_CALL_ERROR_CODE_UNDEFINED, 'PROCEDURE_CALL_UNDEFINED'],
-    [PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED, 'PROCEDURE_CALL_UNINITIALIZED'],
     [PROCEDURE_CALL_PAYLOAD_STRING_PREFIX, 'pc::'],
     [PROCEDURE_CALL_PROTOCOL, 'pc'],
     [NAME, 'PROCEDURE_CALL'],
     [VERSION, __version],
   ])('"%s" = "%s"', function (actualValue, expectedValue) {
     expect(actualValue).toBe(expectedValue);
-  });
-});
-
-describe(`${ProcedureCallError.name}`, function () {
-  test('インスタンス化', function () {
-    /** エラー */
-    const error = new ProcedureCallError();
-
-    expect(error).toBeInstanceOf(ProcedureCallError);
-    expect(error.cause).toBe(undefined);
-    expect(error.code).toBe('');
-    expect(error.data).toBe(undefined);
-    expect(error.message).toBe('');
-  });
-
-  test('インスタンス化(フルオプション)', function () {
-    /** 原因 */
-    const cause = new Error();
-    /** エラー */
-    const error = new ProcedureCallError('abc', 'メッセージです。', { cause, data: { a: 1 } });
-
-    expect(error).toBeInstanceOf(ProcedureCallError);
-    expect(error.cause).toBe(cause);
-    expect(error.code).toBe('abc');
-    expect(error.data).toStrictEqual({ a: 1 });
-    expect(error.message).toBe('メッセージです。');
   });
 });
 
