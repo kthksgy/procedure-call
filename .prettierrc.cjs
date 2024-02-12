@@ -9,7 +9,7 @@
 
 /*
 # パッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
-$ npm i -D prettier@~3.0.1
+$ npm i -D 'prettier@~3.2.4'
 */
 
 module.exports = {

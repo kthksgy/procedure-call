@@ -1,23 +1,33 @@
 /**
  * @file ESLintの設定ファイル
- * @version 1.3.1
+ * @version 1.3.7
  *
  * @tutorial VSCodeで使用している場合、変更を行った後は必ず再起動する。
+ * @tutorial VSCodeで使用している場合、`eslint.workingDirectories`を設定する。
+ * ```json
+ * {
+ *   "eslint.workingDirectories": [
+ *     {
+ *       "mode": "location"
+ *     }
+ *   ]
+ * }
+ * ```
  */
 
 /*
 # 必須のパッケージをインストールする。Yarnを使用する場合は`yarn add`にコマンドを変更する。
 $ npm i -D \
-  '@typescript-eslint/eslint-plugin@~6.3.0' \
-  '@typescript-eslint/parser@~6.3.0' \
+  '@typescript-eslint/eslint-plugin@~6.19.1' \
+  '@typescript-eslint/parser@~6.19.1' \
   'confusing-browser-globals@~1.0.11' \
-  'eslint@~8.46.0' \
-  'eslint-config-prettier@~9.0.0' \
-  'eslint-import-resolver-typescript@~3.5.5' \
-  'eslint-plugin-import@~2.26.0'
+  'eslint@~8.56.0' \
+  'eslint-config-prettier@~9.1.0' \
+  'eslint-import-resolver-typescript@~3.6.1' \
+  'eslint-plugin-import@~2.29.1'
 
 # Reactを使用する場合はインストールする。
-$ npm i -D 'eslint-plugin-react@~7.33.1' 'eslint-plugin-react-hooks@~4.6.0'
+$ npm i -D 'eslint-plugin-react@~7.33.2' 'eslint-plugin-react-hooks@~4.6.0'
 
 # Storybookを使用する場合はインストールする。
 $ npm i -D 'eslint-plugin-storybook@~0.6.13'
@@ -25,6 +35,9 @@ $ npm i -D 'eslint-plugin-storybook@~0.6.13'
 
 const fs = require('fs');
 const path = require('path');
+
+/** ECMAScriptのバージョン */
+const ecmaScriptVersion = 2023;
 
 // パッケージ固有設定の有効化フラグを算出する。
 
@@ -50,8 +63,8 @@ module.exports = {
   env: {
     /** ブラウザのグローバル変数の追加 */
     browser: true,
-    /** ECMAScript 2022のグローバル変数の追加 */
-    es2022: true,
+    /** ECMAScript 2023のグローバル変数の追加 */
+    ['es' + ecmaScriptVersion]: true,
     /** Node.jsのグローバル変数とスコーピングの追加 */
     node: true,
   },
@@ -103,6 +116,8 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         /** 値から推論可能な型を宣言しない。 */
         '@typescript-eslint/no-inferrable-types': 'off',
+        /** `namespace`の宣言をしない。 */
+        '@typescript-eslint/no-namespace': 'off',
         /** 未使用の変数を禁止する。 */
         '@typescript-eslint/no-unused-vars': [
           'warn',
@@ -136,8 +151,8 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    // /** ECMAScript構文のバージョン */
-    // ecmaVersion: 'latest', // `env.es**** = true`の設定で自動設定される。
+    /** ECMAScriptバージョン */
+    ecmaVersion: ecmaScriptVersion,
     sourceType: 'module',
   },
   plugins: ['import'],
@@ -276,7 +291,7 @@ module.exports = {
     /** AMDの`require()`と`define()`を禁止する。 */
     'import/no-amd': 'error',
     /** 循環インポートを禁止する。 */
-    'import/no-cycle': 'error',
+    'import/no-cycle': 'off', // NOTE: 処理に時間が掛かるので無効化する。
     /** 名前付きエクスポートされた名前と同じ名前でデフォルトエクスポートのプロパティを参照しない。 */
     'import/no-named-as-default-member': 'off',
     /** 自己インポートを禁止する。 */
