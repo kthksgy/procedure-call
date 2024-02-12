@@ -1,5 +1,3 @@
-# CEPC - Contextual External Procedure Call
-
-This is a root package for subpackages.
+# @kthksgy/procedure-call
 
 See `packages` directory.
