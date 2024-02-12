@@ -1,14 +1,14 @@
 import {
-  CEPC_ERROR_CODE_UNINITIALIZED,
-  CepcError,
   NAME,
+  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
+  ProcedureCallError,
   callTarget,
   handler,
 } from '@kthksgy/procedure-call';
 
 import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
-import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from '@kthksgy/procedure-call';
+import type { Jsonized, ProcedureCallOptions, ProcedureCallPacket } from '@kthksgy/procedure-call';
 
 /**
  * WebView Hostの手続きを呼び出す。
@@ -20,7 +20,7 @@ import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from '@kthksgy/pr
 export async function callWebViewHost<RequestData, ResponseData>(
   name: string,
   requestData: RequestData,
-  options?: CepcProcedureCallOptions,
+  options?: ProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   if (typeof window === 'object' && window !== null) {
     return callTarget(window.ReactNativeWebView, name, requestData, options);
@@ -29,7 +29,7 @@ export async function callWebViewHost<RequestData, ResponseData>(
       `[${NAME}] \`window.ReactNativeWebView.postMessage()\`が初期化されていないため、` +
         `手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new CepcError(CEPC_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
   }
 }
 
@@ -44,7 +44,7 @@ export function isWebViewGuest() {
  */
 export async function webViewInjectionHandler(payloadString: string) {
   /** 送信関数 */
-  const post = function (message: string, payload: CepcPacket<'req'>) {
+  const post = function (message: string, payload: ProcedureCallPacket<'req'>) {
     if (
       typeof window === 'object' &&
       window !== null &&
@@ -97,7 +97,7 @@ declare global {
       postMessage: { (message: string): void };
     };
     [CEPC_KEY_CALL_WEB_VIEW_HOST]?: {
-      (name: string, requestData: unknown, options?: CepcProcedureCallOptions): Promise<unknown>;
+      (name: string, requestData: unknown, options?: ProcedureCallOptions): Promise<unknown>;
     };
     [CEPC_KEY_WEB_VIEW_INJECTION_HANDLER]?: { (payloadString: string): void };
   }

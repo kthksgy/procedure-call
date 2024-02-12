@@ -1,7 +1,7 @@
 import {
-  CEPC_ERROR_CODE_UNINITIALIZED,
-  CepcError,
   NAME,
+  PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED,
+  ProcedureCallError,
   call,
   generateTemplateLiteralString,
   handler,
@@ -11,7 +11,7 @@ import {
 
 import { CEPC_KEY_CALL_WEB_VIEW_HOST, CEPC_KEY_WEB_VIEW_INJECTION_HANDLER } from './common';
 
-import type { CepcPacket, CepcProcedureCallOptions, Jsonized } from '@kthksgy/procedure-call';
+import type { Jsonized, ProcedureCallOptions, ProcedureCallPacket } from '@kthksgy/procedure-call';
 
 /**
  * WebView Guestの手続きを呼び出す。
@@ -25,7 +25,7 @@ export async function callWebViewGuest<RequestData, ResponseData>(
   webView: { injectJavaScript: { (script: string): void } } | null | undefined,
   name: string,
   requestData: RequestData,
-  options?: CepcProcedureCallOptions,
+  options?: ProcedureCallOptions,
 ): Promise<Jsonized<Awaited<ResponseData>, object>> {
   if (
     typeof webView === 'object' &&
@@ -45,7 +45,7 @@ export async function callWebViewGuest<RequestData, ResponseData>(
     console.error(
       `[${NAME}] WebViewが初期化されていないため、手続き\`${name}\`のリクエストを送信できません。`,
     );
-    throw new CepcError(CEPC_ERROR_CODE_UNINITIALIZED);
+    throw new ProcedureCallError(PROCEDURE_CALL_ERROR_CODE_UNINITIALIZED);
   }
 }
 
@@ -93,7 +93,7 @@ export function generateWebViewMessageEventHandler(getWebView: {
     const payloadString = event.nativeEvent.data;
 
     /** 送信関数 */
-    const post = function (message: string, payload: CepcPacket<'req'>) {
+    const post = function (message: string, payload: ProcedureCallPacket<'req'>) {
       /** WebView */
       const webView = getWebView();
       if (webView) {

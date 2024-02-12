@@ -1,6 +1,6 @@
 import { NAME, callTarget, handler } from '@kthksgy/procedure-call';
 
-import type { CepcPacket } from '@kthksgy/procedure-call';
+import type { ProcedureCallPacket } from '@kthksgy/procedure-call';
 
 /** オリジン */
 const origins = new Set<string | RegExp>();
@@ -36,7 +36,7 @@ export async function messageEventHandler(event: MessageEvent<string>) {
 
     if (allowed) {
       /** 送信関数 */
-      const post = function (payloadString: string, payload: CepcPacket<'req'>) {
+      const post = function (payloadString: string, payload: ProcedureCallPacket<'req'>) {
         /** ソース */
         if (event.source !== null) {
           event.source.postMessage(payloadString);

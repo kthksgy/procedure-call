@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import {
+  NAME,
   PROCEDURE_CALL_ERROR_CODE_INTERNAL,
   PROCEDURE_CALL_ERROR_CODE_TIMEOUT,
   PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
@@ -8,7 +9,6 @@ import {
   PROCEDURE_CALL_PAYLOAD_STRING_PREFIX,
   PROCEDURE_CALL_PROTOCOL,
   ProcedureCallError,
-  NAME,
   VERSION,
   isDefaultProcedureRegistered,
   isProcedureRegistered,
