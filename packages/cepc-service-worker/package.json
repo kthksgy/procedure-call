@@ -3,8 +3,7 @@
     "name": "kthksgy",
     "url": "https://github.com/kthksgy"
   },
-  "license": "MIT",
-  "description": "CEPC Service Worker",
+  "description": "Procedure Call Service Worker",
   "devDependencies": {
     "@vitest/coverage-v8": "^1.2.2",
     "typescript": "^5.3.3",
@@ -21,10 +20,9 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/kthksgy/cepc/tree/main/packages/cepc-service-worker",
+  "homepage": "https://github.com/kthksgy/procedure-call/tree/main/packages/procedure-call-service-worker",
   "keywords": [
     "call",
-    "cepc",
     "communication",
     "interface",
     "local",
@@ -33,16 +31,17 @@
     "remote",
     "rpc"
   ],
+  "license": "MIT",
   "main": "./lib/index.umd.js",
   "module": "./lib/index.mjs",
-  "name": "cepc-service-worker",
+  "name": "@kthksgy/procedure-call-service-worker",
   "peerDependencies": {
-    "cepc": "^0.0.5"
+    "procedure-call": "^0.0.5"
   },
   "repository": {
-    "directory": "packages/cepc-service-worker",
+    "directory": "packages/procedure-call-service-worker",
     "type": "git",
-    "url": "https://github.com/kthksgy/cepc.git"
+    "url": "https://github.com/kthksgy/procedure-call.git"
   },
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --project tsconfig.build.json",

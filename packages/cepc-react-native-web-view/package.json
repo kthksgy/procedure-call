@@ -4,7 +4,7 @@
     "url": "https://github.com/kthksgy"
   },
   "license": "MIT",
-  "description": "CEPC React Native WebView",
+  "description": "Procedure Call React Native WebView",
   "devDependencies": {
     "@vitest/coverage-v8": "^1.2.2",
     "typescript": "^5.3.3",
@@ -21,10 +21,9 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/kthksgy/cepc/tree/main/packages/cepc-react-native-web-view",
+  "homepage": "https://github.com/kthksgy/procedure-call/tree/main/packages/procedure-call-react-native-web-view",
   "keywords": [
     "call",
-    "cepc",
     "communication",
     "interface",
     "local",
@@ -35,14 +34,14 @@
   ],
   "main": "./lib/index.umd.js",
   "module": "./lib/index.mjs",
-  "name": "cepc-react-native-web-view",
+  "name": "@kthksgy/procedure-call-react-native-web-view",
   "peerDependencies": {
-    "cepc": "^0.0.5"
+    "@kthksgy/procedure-call": "^0.0.5"
   },
   "repository": {
-    "directory": "packages/cepc-react-native-web-view",
+    "directory": "packages/procedure-call-react-native-web-view",
     "type": "git",
-    "url": "https://github.com/kthksgy/cepc.git"
+    "url": "https://github.com/kthksgy/procedure-call.git"
   },
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --project tsconfig.build.json",
