@@ -20,7 +20,7 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/kthksgy/procedure-call/tree/main/packages/procedure-call",
+  "homepage": "https://github.com/kthksgy/procedure-call/tree/main/packages/main",
   "keywords": [
     "call",
     "communication",
