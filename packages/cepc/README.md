@@ -1,6 +1,6 @@
-# CEPC - Contextual External Procedure Call
+# @kthksgy/procedure-call
 
-CEPC is a procedure call interface designed for communication across different contexts, such as Window, React Native WebView or Service Worker.
+@kthksgy/procedure-call is a procedure call interface designed for communication across different contexts, such as Window, React Native WebView or Service Worker.
 
 ## Todos
 
@@ -10,11 +10,11 @@ CEPC is a procedure call interface designed for communication across different c
 
 ## Features
 
-CEPC has following features.
+@kthksgy/procedure-call has following features.
 
 - Simple
 - High compatibility
-  - Can be used when two contexts can send string each other !
+  - This can be used when two contexts can send string each other !
 - Supports `async` / `await`
 - Fully typed
 - Small (less than 5KB when Gzipped)
@@ -23,12 +23,12 @@ CEPC has following features.
 
 ## Context specific libraries
 
-There are some context specific libraries for CEPC.
+There are some context specific libraries for @kthksgy/procedure-call.
 
-If you are planning to use CEPC with these ccontexts, try it first !
+If you are planning to use @kthksgy/procedure-call with these ccontexts, try it first !
 
-- [React Native WebView](../cepc-react-native-web-view)
-- [Service Worker](../cepc-service-worker)
+- [React Native WebView](../react-native-web-view)
+- [Service Worker](../service-worker)
 
 ## Installation
 
@@ -36,10 +36,10 @@ Run command below.
 
 ```
 # npm
-$ npm install cepc
+$ npm install @kthksgy/procedure-call
 
 # yarn
-$ yarn add cepc
+$ yarn add @kthksgy/procedure-call
 ```
 
 ## Create an interface for any context
