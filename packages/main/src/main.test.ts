@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import {
-  NAME,
   PROCEDURE_CALL_ERROR_CODE_INTERNAL,
   PROCEDURE_CALL_ERROR_CODE_TIMEOUT,
   PROCEDURE_CALL_ERROR_CODE_UNDEFINED,
@@ -9,13 +8,13 @@ import {
   PROCEDURE_CALL_PAYLOAD_STRING_PREFIX,
   PROCEDURE_CALL_PROTOCOL,
   ProcedureCallError,
-  VERSION,
   isDefaultProcedureRegistered,
   isProcedureRegistered,
   registerDefaultProcedure,
   registerProcedure,
   reset,
-} from './index';
+} from './main';
+import { NAME, VERSION } from './package';
 
 describe('定数定義', function () {
   test.each([
