@@ -37,7 +37,7 @@
   "module": "./lib/index.js",
   "name": "@kthksgy/procedure-call-service-worker",
   "peerDependencies": {
-    "@kthksgy/procedure-call": "^0.0.0"
+    "@kthksgy/procedure-call": "^0.0.1"
   },
   "repository": {
     "directory": "packages/service-worker",
@@ -52,5 +52,5 @@
   },
   "type": "module",
   "types": "./lib/index.d.ts",
-  "version": "0.0.0"
+  "version": "0.0.1"
 }
