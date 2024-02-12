@@ -1,4 +1,4 @@
-# CEPC React Native WebView
+# @kthksgy/procedure-call-react-native-web-view
 
 **This document is under construction.**
 
@@ -13,10 +13,10 @@ Run command below.
 
 ```
 # npm
-$ npm install cepc cepc-react-native-web-view
+$ npm install @kthksgy/procedure-call @kthksgy/procedure-call-react-native-web-view
 
 # yarn
-$ yarn add cepc-cepc-react-native-web-view
+$ yarn add @kthksgy/procedure-call @kthksgy/procedure-call-react-native-web-view
 ```
 
 ## WebView guest usage
