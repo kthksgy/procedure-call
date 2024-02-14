@@ -18,6 +18,7 @@ export default defineConfig(function () {
         fileName: 'index',
         name: getPackageNameSpaceName(packageParameters.name),
       },
+      minify: false,
       outDir: 'lib',
       rollupOptions: {
         external: [
